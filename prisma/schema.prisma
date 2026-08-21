@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 展會設定，每檔展會一列。未來換展期＝新增一列，不改程式碼。
+// 見 PROJECT_SPEC.md 第 2 節。
+model Event {
+  id                String   @id @default(cuid())
+  name              String
+  themeSettings     Json     @default("{}")
+  dateRangeStart    DateTime
+  dateRangeEnd      DateTime
+  closedWeekday     Int      @default(1) // 週一 = 1（JS getDay() 慣例：日=0...六=6）
+  phaseOpenRules    Json     @default("[]") // [{ openDate, appliesToMonth }]
+  bannerText        String   @default("")
+  noticeText        String   @default("")
+  emailTemplate     String   @default("")
+  consentText       String   @default("")
+  consentVersion    String   @default("v1")
+  dataRetentionDays Int      @default(365)
+
+  sessionTemplates SessionTemplate[]
+  sessions         Session[]
+  bookings         Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 每日場次時間樣板，用來展開成實際 Session
+model SessionTemplate {
+  id              String @id @default(cuid())
+  eventId         String
+  event           Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  timeSlots       Json // string[]，例如 ["10:00","10:35",...]
+  capacityPerSlot Int    @default(30)
+
+  createdAt DateTime @default(now())
+}
+
+// 實際場次（由樣板 × 日期展開）
+model Session {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  date      DateTime // 僅取日期部分（存 UTC 午夜，前端一律以 Asia/Taipei 顯示與比對）
+  timeSlot  String
+  capacity  Int
+  remaining Int
+  isOpen    Boolean  @default(true)
+
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([eventId, date, timeSlot])
+  @@index([eventId, date])
+}
+
+// 預約紀錄
+model Booking {
+  id     String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  bookingCode String @unique
+
+  name  String
+  phone String
+  email String
+
+  phoneNormalized String
+  emailNormalized String
+
+  headcount Int
+
+  consentGivenAt DateTime
+  consentVersion String
+
+  status    String  @default("pending") // pending / confirmed / cancelled（僅後台特殊情況）
+  checkedIn Boolean @default(false)
+
+  bookingDate DateTime // 使用者選擇的預約日期（不是 createdAt），用於「每日每人限一次」去重
+
+  reminderSentAt DateTime? // 前一日提醒信是否已寄送，防止排程重複寄送
+
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, bookingDate, emailNormalized])
+  @@unique([eventId, bookingDate, phoneNormalized])
+  @@index([eventId, sessionId])
+}
+
+// 後台帳號（單一角色，不分權限）
+model Admin {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+
+  createdAt DateTime @default(now())
+}
