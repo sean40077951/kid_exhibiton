@@ -84,7 +84,6 @@ export default function BookingWizard() {
             session={selectedSession}
             headcount={headcount}
             consentText={event?.consentText ?? ""}
-            noticeText={event?.noticeText ?? ""}
             onBack={() => setStep(2)}
             onDone={(res) => {
               setResult(res);

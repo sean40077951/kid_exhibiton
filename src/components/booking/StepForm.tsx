@@ -18,7 +18,6 @@ export default function StepForm({
   session,
   headcount,
   consentText,
-  noticeText,
   onBack,
   onDone
 }: {
@@ -26,7 +25,6 @@ export default function StepForm({
   session: SessionOption;
   headcount: number;
   consentText: string;
-  noticeText: string;
   onBack: () => void;
   onDone: (result: BookingResult) => void;
 }) {
@@ -128,14 +126,12 @@ export default function StepForm({
 
       <div className="rounded-2xl border-2 border-brand-danger/60 bg-brand-danger/10 p-4 text-sm">
         <p className="font-bold text-brand-danger">送出後不能取消或修改</p>
-        <p className="mt-1 opacity-90">系統不提供取消與更改功能，請確認日期、場次與人數無誤再送出。若無法到場，直接不入場即可。</p>
+        <p className="mt-1 opacity-90">系統不提供取消與更改功能，請確認日期、場次與人數無誤再送出。</p>
+        <p className="mt-1 opacity-90">小提醒：記得在預約時間前 10 分鐘到場報到，逾時不候喔！</p>
       </div>
 
-      {noticeText && (
-        <details className="rounded-2xl bg-white/70 p-4 text-sm">
-          <summary className="cursor-pointer font-bold">入場注意事項</summary>
-          <p className="mt-2 whitespace-pre-line opacity-90">{noticeText}</p>
-        </details>
+      {consentText && (
+        <div className="rounded-2xl bg-white/70 p-3 text-xs leading-relaxed opacity-80">{consentText}</div>
       )}
 
       <label className="flex items-start gap-2 text-xs opacity-90">
@@ -145,10 +141,7 @@ export default function StepForm({
           onChange={(e) => setConsent(e.target.checked)}
           className="mt-0.5"
         />
-        <span>
-          我已閱讀入場注意事項，同意主辦單位為本次預約蒐集與使用上述個人資料。
-          {consentText && <span className="block opacity-70">{consentText}</span>}
-        </span>
+        <span>我已閱讀入場注意事項，同意主辦單位為本次預約蒐集與使用上述個人資料。</span>
       </label>
 
       {/* Cloudflare Turnstile 掛載點：正式環境設定 NEXT_PUBLIC_TURNSTILE_SITE_KEY 後於此渲染 widget */}

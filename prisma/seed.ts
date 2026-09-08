@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { dateStringToUtcMidnight, formatDate } from "../src/lib/timezone";
 
 const prisma = new PrismaClient();
@@ -36,11 +37,13 @@ async function main() {
         { openDate: "2026-11-20", appliesToMonth: "2026-12" }
       ],
       bannerText: "怪獸來囉！10/10 正式開展，記得提前 10 分鐘到場報到唷。",
+      // Step 4（預約完成頁）專用的完整入場注意事項清單，內容照線稿逐字打上。
       noticeText:
         "1. 請於場次開始前 10 分鐘報到，逾時 15 分鐘未報到，名額將釋出給現場候補。\n2. 出示確認信或預約憑證，服務台核對姓名與預約編號後入場。\n3. 每場放電 45 分鐘。\n4. 90 公分以下小朋友請家長全程陪同。\n5. 本展區設有球池，進入需脫鞋、穿襪子（服務台可購買）。\n6. 展區禁止飲食，可攜帶飲用水。\n7. 預約不可取消或修改。",
       emailTemplate: "",
+      // Step 3（填寫預約資料頁）勾選框旁的個資同意聲明文字，同樣照線稿逐字打上。
       consentText:
-        "【請業主提供正式個資同意聲明文字，開發端僅負責顯示與記錄同意，不自行撰寫法律文字】",
+        "勾選：於本網站或填寫之個人資料（包含姓名、聯絡電話、電子信箱）僅作為「怪獸放電場」展覽預約使用，不作為其他商業用途，亦不會提供於第三方。本活動結束後，相關個人資料將依法定予以銷毀。送出此預約表單，即視為同意本活動之個人資料使用方式。",
       consentVersion: "v1",
       dataRetentionDays: 365
     }
@@ -91,6 +94,20 @@ async function main() {
   }
 
   console.log(`Seed 完成：event=${event.name}，展開場次 upsert 共 ${created} 筆。`);
+
+  // 後台帳號：單一組帳號、不分權限（PROJECT_SPEC.md 第 7 節）。
+  // 用 .env 的 ADMIN_EMAIL / ADMIN_PASSWORD 建立，方便本機開發登入；正式環境務必改掉預設密碼。
+  const adminEmail = (process.env.ADMIN_EMAIL || "admin@example.com").trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD || "changeme";
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
+
+  await prisma.admin.upsert({
+    where: { email: adminEmail },
+    update: { passwordHash },
+    create: { email: adminEmail, passwordHash }
+  });
+
+  console.log(`後台帳號已建立／更新：${adminEmail}`);
 }
 
 main()

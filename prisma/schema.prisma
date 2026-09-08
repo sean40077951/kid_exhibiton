@@ -108,3 +108,14 @@ model Admin {
 
   createdAt DateTime @default(now())
 }
+
+// 資料匯出紀錄（PROJECT_SPEC.md 第 7 節：「建議記錄誰於何時匯出」）
+model AdminExportLog {
+  id          String   @id @default(cuid())
+  adminEmail  String
+  rangeStart  DateTime
+  rangeEnd    DateTime
+  sessionId   String?
+  rowCount    Int
+  exportedAt  DateTime @default(now())
+}

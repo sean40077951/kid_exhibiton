@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type BookingRow = {
   id: string;
@@ -15,11 +16,12 @@ type BookingRow = {
   checkedIn: boolean;
 };
 
-// 後台雛形：查詢畫面骨架，尚未串登入驗證與匯出功能（見 README「尚未實作／待確認事項」）。
 export default function AdminBookingsPage() {
+  const router = useRouter();
   const [date, setDate] = useState("");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -30,9 +32,30 @@ export default function AdminBookingsPage() {
       .finally(() => setLoading(false));
   }, [date]);
 
+  async function handleLogout() {
+    setLoggingOut(true);
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+      router.push("/admin/login");
+      router.refresh();
+    } finally {
+      setLoggingOut(false);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-4 text-xl font-bold">預約查詢（雛形，尚無登入保護）</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-xl font-bold">預約查詢</h1>
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="rounded border border-black/20 px-3 py-1 text-sm hover:bg-black/5 disabled:opacity-40"
+        >
+          {loggingOut ? "登出中…" : "登出"}
+        </button>
+      </div>
 
       <div className="mb-4 flex items-center gap-2">
         <label className="text-sm">

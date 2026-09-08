@@ -10,11 +10,24 @@ import { formatDate } from "@/lib/timezone";
 export const dynamic = "force-dynamic";
 
 const bodySchema = z.object({
-  sessionId: z.string().min(1),
-  name: z.string().trim().min(1, "請填寫姓名"),
-  phone: z.string().trim().min(8, "請填寫正確的聯絡電話"),
-  email: z.string().trim().email("請填寫正確的電子信箱"),
-  headcount: z.number().int().min(1).max(5),
+  sessionId: z.string({ required_error: "缺少場次資訊，請重新選擇" }).min(1, "缺少場次資訊，請重新選擇"),
+  name: z
+    .string({ required_error: "請填寫姓名" })
+    .trim()
+    .min(1, "請填寫姓名"),
+  phone: z
+    .string({ required_error: "請填寫聯絡電話" })
+    .trim()
+    .min(8, "請填寫正確的聯絡電話"),
+  email: z
+    .string({ required_error: "請填寫電子信箱" })
+    .trim()
+    .email("請填寫正確的電子信箱"),
+  headcount: z
+    .number({ required_error: "請選擇預約人數", invalid_type_error: "請選擇預約人數" })
+    .int()
+    .min(1, "預約人數至少 1 人")
+    .max(5, "預約人數最多 5 人"),
   consent: z.literal(true, { errorMap: () => ({ message: "請勾選同意個資使用聲明" }) }),
   turnstileToken: z.string().optional(),
   // Honeypot：一般使用者看不到、不會填寫的欄位，機器人常會誤填。
@@ -75,15 +88,15 @@ export async function POST(req: NextRequest) {
   const emailNormalized = normalizeEmail(input.email);
   const phoneNormalized = normalizePhone(input.phone);
 
-  const session = await prisma.session.findUnique({ where: { id: input.sessionId } });
-  if (!session) {
-    return NextResponse.json({ error: "找不到此場次，請重新選擇" }, { status: 404 });
-  }
-  if (!session.isOpen) {
-    return NextResponse.json({ error: "此場次已關閉，請重新選擇" }, { status: 409 });
-  }
-
   try {
+    const session = await prisma.session.findUnique({ where: { id: input.sessionId } });
+    if (!session) {
+      return NextResponse.json({ error: "找不到此場次，請重新選擇" }, { status: 404 });
+    }
+    if (!session.isOpen) {
+      return NextResponse.json({ error: "此場次已關閉，請重新選擇" }, { status: 409 });
+    }
+
     const booking = await prisma.$transaction(async (tx) => {
       // 原子扣減：單一 UPDATE + WHERE remaining >= headcount，
       // 影響列數為 0 代表名額不足，交由 catch 統一處理（見 PROJECT_SPEC.md 第 3.1 節）。

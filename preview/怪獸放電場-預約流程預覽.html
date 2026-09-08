@@ -1,0 +1,889 @@
+<title>怪獸放電場</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap">
+
+<style>
+  :root{
+    --backdrop:#EAE1D1;
+    --bg:#F3E6D8;
+    --panel:#FBD9BE;
+    --panel-line:rgba(20,66,79,.10);
+    --card:#FFFFFF;
+    --ink:#173840;
+    --ink-soft:rgba(23,56,64,.62);
+    --ink-faint:rgba(23,56,64,.38);
+    --primary:#1B5E70;
+    --primary-dark:#14424F;
+    --primary-tint:rgba(27,94,112,.10);
+    --accent:#F5A623;
+    --accent-ink:#6A4300;
+    --success:#3FA65B;
+    --success-bg:rgba(63,166,91,.15);
+    --danger:#D6473F;
+    --danger-bg:rgba(214,71,63,.10);
+    --warning:#E8B923;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 8% 12%, rgba(27,94,112,.10) 0, transparent 42%),
+      radial-gradient(circle at 92% 82%, rgba(245,166,35,.16) 0, transparent 46%),
+      var(--backdrop);
+    background-attachment:fixed;
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .intro{
+    width:100%;
+    max-width:440px;
+    text-align:center;
+    margin-bottom:18px;
+  }
+  .intro .eyebrow{
+    font-family:"Baloo 2",sans-serif;
+    font-weight:700;
+    font-size:12px;
+    letter-spacing:.14em;
+    color:var(--primary);
+    text-transform:uppercase;
+  }
+  .intro p{
+    margin:6px 0 0;
+    font-size:12.5px;
+    line-height:1.6;
+    color:var(--ink-soft);
+  }
+
+  .device{
+    width:100%;
+    max-width:440px;
+    background:var(--bg);
+    border-radius:32px;
+    box-shadow:0 24px 60px -20px rgba(20,66,79,.45), 0 2px 0 rgba(255,255,255,.5) inset;
+    border:1px solid rgba(255,255,255,.6);
+    overflow:hidden;
+  }
+
+  .chrome{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 16px;
+    background:var(--primary-dark);
+    color:rgba(255,255,255,.75);
+    font-family:"Baloo 2",sans-serif;
+    font-size:11px;
+    letter-spacing:.04em;
+  }
+  .chrome button{
+    all:unset;
+    cursor:pointer;
+    font-family:"Baloo 2",sans-serif;
+    font-size:11px;
+    color:rgba(255,255,255,.85);
+    background:rgba(255,255,255,.12);
+    padding:5px 10px;
+    border-radius:999px;
+    transition:background .15s ease;
+  }
+  .chrome button:hover{background:rgba(255,255,255,.22);}
+  .chrome button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  .app{
+    padding:20px 20px 26px;
+  }
+
+  header.app-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .logo .mark{
+    width:34px;height:34px;border-radius:11px;
+    background:linear-gradient(155deg, var(--accent), #d98a12);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 0 rgba(0,0,0,.12) inset, 0 4px 10px -4px rgba(106,67,0,.6);
+  }
+  .logo .mark svg{width:19px;height:19px;}
+  .logo .word{
+    /* ZCOOL KuaiLe（站酷快樂體）只做了簡體字，缺繁體字的字型檔，遇到「獸／場／選」這類字會
+       整個字掉回瀏覽器預設字型，看起來就是使用者反映的「格式跑掉」。改用 Noto Sans TC 特黑（900）
+       撐大字重＋加寬字距做出活潑感，繁體字才不會缺字。 */
+    font-family:"Noto Sans TC",sans-serif;
+    font-weight:900;
+    font-size:18px;
+    color:var(--primary-dark);
+    letter-spacing:.04em;
+  }
+  .cta-pill{
+    font-family:"Baloo 2",sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    color:var(--primary-dark);
+    background:var(--accent);
+    padding:7px 14px;
+    border-radius:999px;
+    box-shadow:0 3px 0 #c9860f;
+  }
+
+  .progress{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    margin-bottom:16px;
+    scrollbar-width:none;
+  }
+  .progress::-webkit-scrollbar{display:none;}
+  .p-step{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .p-num{
+    width:22px;height:22px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Baloo 2",sans-serif;
+    font-weight:700;
+    font-size:11.5px;
+    background:rgba(23,56,64,.08);
+    color:var(--ink-faint);
+    transition:all .2s ease;
+  }
+  .p-step.done .p-num{background:var(--primary); color:#fff;}
+  .p-step.active .p-num{background:var(--accent); color:var(--accent-ink);}
+  .p-label{font-size:12px; color:var(--ink-faint); transition:color .2s ease;}
+  .p-step.active .p-label{color:var(--ink); font-weight:700;}
+  .p-step.done .p-label{color:var(--ink-soft);}
+  .p-sep{width:12px; height:1px; background:var(--panel-line); flex-shrink:0;}
+
+  .panel{
+    background:var(--panel);
+    border-radius:22px;
+    padding:18px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset;
+  }
+
+  .back-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .back-btn{
+    all:unset;
+    cursor:pointer;
+    width:34px;height:34px;
+    border-radius:999px;
+    background:var(--primary);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;
+    box-shadow:0 2px 0 var(--primary-dark);
+  }
+  .back-btn:hover{filter:brightness(1.08);}
+  .back-btn:focus-visible{outline:2px solid var(--primary-dark); outline-offset:2px;}
+  .back-text{font-size:12.5px; color:var(--ink-soft);}
+
+  .card{
+    background:var(--card);
+    border-radius:16px;
+    padding:14px 16px;
+  }
+
+  .banner{
+    background:var(--primary-tint);
+    color:var(--primary-dark);
+    font-size:12.5px;
+    line-height:1.5;
+    padding:10px 12px;
+    border-radius:12px;
+    margin-bottom:14px;
+  }
+
+  .cal-card{background:rgba(255,255,255,.55); border-radius:18px; padding:14px;}
+  .cal-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .cal-nav button{
+    all:unset; cursor:pointer;
+    width:30px;height:30px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px; color:var(--primary-dark);
+  }
+  .cal-nav button:hover{background:rgba(23,56,64,.08);}
+  .cal-title{font-family:"Baloo 2",sans-serif; font-weight:700; font-size:15.5px;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .cal-wd{
+    text-align:center; font-size:11px; font-weight:700;
+    color:var(--ink-faint); padding-bottom:4px;
+  }
+  .cal-cell{
+    height:46px;
+    border-radius:10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:"Baloo 2",sans-serif;
+    cursor:default;
+    transition:transform .1s ease, filter .12s ease;
+    border:none;
+  }
+  .cal-cell.empty{visibility:hidden;}
+  .cal-cell .d{font-weight:700; font-size:13.5px; line-height:1.1;}
+  .cal-cell .r{font-size:8.5px; opacity:.85; line-height:1.1;}
+  .cal-cell.available{background:var(--success); color:#fff; cursor:pointer;}
+  .cal-cell.low{background:var(--warning); color:var(--accent-ink); cursor:pointer;}
+  .cal-cell.full{background:rgba(23,56,64,.16); color:rgba(23,56,64,.45); cursor:not-allowed;}
+  .cal-cell.closed{background:transparent; color:rgba(23,56,64,.22); cursor:not-allowed;}
+  .cal-cell.available:hover, .cal-cell.low:hover{transform:translateY(-1px); filter:brightness(1.06);}
+  .cal-cell:focus-visible{outline:2px solid var(--primary-dark); outline-offset:2px;}
+
+  .legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; font-size:10.5px; color:var(--ink-soft);}
+  .legend span{display:flex; align-items:center; gap:5px;}
+  .dot{width:10px;height:10px;border-radius:3px; display:inline-block;}
+
+  .summary-row{
+    display:flex; justify-content:space-between;
+    padding:6px 0; font-size:13px;
+    border-bottom:1px solid rgba(23,56,64,.07);
+  }
+  .summary-row:last-child{border-bottom:none;}
+  .summary-row .k{color:var(--ink-faint);}
+  .summary-row .v{font-weight:700; font-family:"Baloo 2",sans-serif;}
+
+  .section-title{font-size:13px; font-weight:700; margin:14px 0 8px;}
+  .section-title:first-child{margin-top:0;}
+
+  .slot{
+    width:100%;
+    text-align:left;
+    border:2px solid transparent;
+    border-radius:14px;
+    padding:11px 13px;
+    margin-bottom:8px;
+    background:rgba(245,166,35,.28);
+    cursor:pointer;
+    transition:background .12s ease, border-color .12s ease;
+  }
+  .slot:hover{background:rgba(245,166,35,.42);}
+  .slot.selected{border-color:var(--danger); background:rgba(245,166,35,.5);}
+  .slot.full{background:rgba(23,56,64,.06); cursor:not-allowed; opacity:.55;}
+  .slot-top{display:flex; justify-content:space-between; align-items:center;}
+  .slot-time{font-family:"Baloo 2",sans-serif; font-weight:700; font-size:16.5px;}
+  .slot-remaining{font-size:12px; font-weight:700;}
+  .slot-remaining.low{color:var(--danger);}
+  .slot-bar{height:5px; border-radius:999px; background:rgba(23,56,64,.12); margin-top:6px; overflow:hidden;}
+  .slot-bar > i{display:block; height:100%; background:var(--primary);}
+  .slot.full .slot-bar > i{background:var(--danger);}
+
+  .headcount{display:flex; gap:8px; margin-top:6px;}
+  .hc-btn{
+    all:unset; cursor:pointer;
+    width:42px;height:42px;
+    border-radius:12px;
+    border:2px solid rgba(27,94,112,.28);
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Baloo 2",sans-serif; font-weight:700; font-size:15px;
+    color:var(--primary-dark);
+    background:#fff;
+    transition:all .12s ease;
+  }
+  .hc-btn.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+  .hc-btn:focus-visible{outline:2px solid var(--primary-dark); outline-offset:2px;}
+  .hint{font-size:11.5px; color:var(--ink-faint); margin-top:8px; line-height:1.5;}
+
+  .btn-primary{
+    width:100%;
+    border:none;
+    border-radius:14px;
+    padding:13px;
+    font-family:"Baloo 2",sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:#fff;
+    background:var(--primary);
+    box-shadow:0 3px 0 var(--primary-dark);
+    cursor:pointer;
+    margin-top:16px;
+    transition:filter .12s ease, transform .05s ease;
+  }
+  .btn-primary:active{transform:translateY(2px); box-shadow:0 1px 0 var(--primary-dark);}
+  .btn-primary:disabled{background:rgba(23,56,64,.18); box-shadow:none; cursor:not-allowed;}
+  .btn-primary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .btn-success{background:var(--success); box-shadow:0 3px 0 #2c7d43;}
+  .btn-success:active{box-shadow:0 1px 0 #2c7d43;}
+
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12.5px; font-weight:700; margin-bottom:5px;}
+  .field label .req{color:var(--danger);}
+  .field input{
+    width:100%;
+    padding:10px 12px;
+    border-radius:11px;
+    border:1.5px solid rgba(23,56,64,.16);
+    font-size:14px;
+    font-family:inherit;
+    color:var(--ink);
+    background:#fff;
+  }
+  .field input:focus{outline:2px solid var(--primary); outline-offset:0; border-color:transparent;}
+  .field input::placeholder{color:rgba(23,56,64,.32);}
+
+  .warn-box{
+    background:var(--danger-bg);
+    border:1.5px solid rgba(214,71,63,.4);
+    border-radius:14px;
+    padding:12px 13px;
+    margin-top:14px;
+  }
+  .warn-box .t{font-weight:700; color:var(--danger); font-size:13px;}
+  .warn-box p{margin:4px 0 0; font-size:12px; color:var(--ink-soft); line-height:1.55;}
+
+  details.notice{
+    margin-top:12px;
+    background:rgba(255,255,255,.55);
+    border-radius:14px;
+    padding:11px 13px;
+  }
+  details.notice summary{cursor:pointer; font-weight:700; font-size:13px; list-style:none;}
+  details.notice summary::-webkit-details-marker{display:none;}
+  details.notice summary::after{content:"›"; float:right; transform:rotate(90deg); transition:transform .15s ease; font-size:16px; color:var(--ink-faint);}
+  details.notice[open] summary::after{transform:rotate(-90deg);}
+  details.notice p{white-space:pre-line; font-size:12px; color:var(--ink-soft); line-height:1.65; margin:8px 0 0;}
+
+  .consent-text{
+    margin-top:12px;
+    background:rgba(255,255,255,.55);
+    border-radius:14px;
+    padding:11px 13px;
+    font-size:11.5px;
+    line-height:1.65;
+    color:var(--ink-soft);
+  }
+
+  .consent{
+    display:flex; gap:9px; align-items:flex-start;
+    margin-top:14px; font-size:11.5px; color:var(--ink-soft); line-height:1.55;
+  }
+  .consent input{margin-top:3px; accent-color:var(--primary); width:15px; height:15px; flex-shrink:0;}
+
+  .error-msg{color:var(--danger); font-size:12.5px; font-weight:700; margin-top:10px;}
+
+  .success-hero{
+    background:var(--success-bg);
+    border-radius:18px;
+    text-align:center;
+    padding:26px 16px;
+  }
+  .success-hero .check{
+    width:52px;height:52px;border-radius:999px;
+    background:var(--success);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 10px;
+    box-shadow:0 4px 0 #2c7d43;
+  }
+  .success-hero .check svg{width:26px;height:26px;}
+  .success-hero h2{margin:0; font-family:"Baloo 2",sans-serif; font-size:21px; color:var(--success);}
+  .success-hero p{margin:8px 0 0; font-size:12.5px; color:var(--ink-soft); line-height:1.6;}
+
+  .code-card{
+    background:var(--card);
+    border-radius:16px;
+    padding:16px;
+    margin-top:14px;
+    text-align:center;
+  }
+  .code-card .cap{font-size:11px; color:var(--ink-faint); letter-spacing:.06em;}
+  .code-card .code{
+    font-family:"Baloo 2",sans-serif;
+    font-weight:800;
+    font-size:26px;
+    letter-spacing:.03em;
+    color:var(--primary-dark);
+    margin:4px 0 12px;
+    font-variant-numeric:tabular-nums;
+  }
+
+  .step{display:none;}
+  .step.active{display:block; animation:fade .18s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  @media (prefers-reduced-motion:reduce){
+    .step.active{animation:none;}
+  }
+
+  @media (max-width:400px){
+    .app{padding:16px 14px 22px;}
+  }
+</style>
+
+<div class="intro">
+  <div class="eyebrow">Prototype Preview · 假資料展示</div>
+  <p>這是「怪獸放電場」線上預約流程的介面雛形，畫面資料為隨機產生的展示用假資料。實際版本會即時連線資料庫顯示真實剩餘名額。</p>
+</div>
+
+<div class="device">
+  <div class="chrome">
+    <span>怪獸放電場 · 預約流程 Demo</span>
+    <span style="display:flex; gap:6px;">
+      <button id="restartTop" type="button">重新開始</button>
+      <button id="clearDemoData" type="button" title="清掉這個瀏覽器裡 demo 送出過的預約紀錄，名額全部恢復滿額">清空假資料</button>
+    </span>
+  </div>
+
+  <div class="app">
+    <header class="app-head">
+      <div class="logo">
+        <span class="mark">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M13 2 4 14h6l-1 8 10-13h-6l1-7z" fill="#14424F"/>
+          </svg>
+        </span>
+        <span class="word">怪獸放電場</span>
+      </div>
+      <span class="cta-pill">線上預約</span>
+    </header>
+
+    <nav class="progress" id="progress" aria-label="預約進度"></nav>
+
+    <section class="panel">
+
+      <!-- STEP 1 -->
+      <div class="step" data-step="1">
+        <div class="banner">怪獸來囉！10/10 正式開展，記得提前 10 分鐘到場報到唷。</div>
+        <div class="cal-card">
+          <div class="cal-nav">
+            <button type="button" id="prevMonth" aria-label="上個月">‹</button>
+            <span class="cal-title" id="calTitle"></span>
+            <button type="button" id="nextMonth" aria-label="下個月">›</button>
+          </div>
+          <div class="cal-grid" id="calWeekdays"></div>
+          <div class="cal-grid" id="calDays" style="margin-top:4px;"></div>
+          <div class="legend">
+            <span><i class="dot" style="background:var(--success)"></i>可預約</span>
+            <span><i class="dot" style="background:var(--warning)"></i>名額緊張</span>
+            <span><i class="dot" style="background:rgba(23,56,64,.16)"></i>額滿</span>
+            <span><i class="dot" style="background:transparent;border:1px solid rgba(23,56,64,.3)"></i>休館／未開放</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step" data-step="2">
+        <div class="back-row">
+          <button class="back-btn" type="button" data-back="1">‹</button>
+          <span class="back-text">返回上一頁</span>
+        </div>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="summary-row"><span class="k">預約日期</span><span class="v" id="s2-date"></span></div>
+        </div>
+
+        <div class="section-title">場次（每場上限 30 人）</div>
+        <div id="slotList"></div>
+
+        <div class="section-title">預約人數（最多 5 人）</div>
+        <div class="headcount" id="headcount"></div>
+        <p class="hint">含大人與小孩，需至少 1 位成人同行。3 歲以下兒童需至少 1 位成人同行。</p>
+
+        <button class="btn-primary btn-success" id="toStep3" type="button" disabled>下一步：填寫資料</button>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step" data-step="3">
+        <div class="back-row">
+          <button class="back-btn" type="button" data-back="2">‹</button>
+          <span class="back-text">返回上一頁</span>
+        </div>
+        <div class="card" style="margin-bottom:14px;">
+          <div class="summary-row"><span class="k">日期</span><span class="v" id="s3-date"></span></div>
+          <div class="summary-row"><span class="k">場次</span><span class="v" id="s3-time"></span></div>
+          <div class="summary-row"><span class="k">人數</span><span class="v" id="s3-hc"></span></div>
+        </div>
+
+        <form id="bookingForm">
+          <div class="card">
+            <div class="field">
+              <label for="f-name">姓名 <span class="req">*</span></label>
+              <input id="f-name" required placeholder="請填寫預約人姓名">
+            </div>
+            <div class="field">
+              <label for="f-phone">聯絡電話 <span class="req">*</span></label>
+              <input id="f-phone" required placeholder="09xxxxxxxx">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label for="f-email">電子信箱 <span class="req">*</span></label>
+              <input id="f-email" type="email" required placeholder="confirm@example.com">
+            </div>
+          </div>
+
+          <div class="warn-box">
+            <div class="t">送出後不能取消或修改</div>
+            <p>系統不提供取消與更改功能，請確認日期、場次與人數無誤再送出。</p>
+            <p>小提醒：記得在預約時間前 10 分鐘到場報到，逾時不候喔！</p>
+          </div>
+
+          <div class="consent-text">勾選：於本網站或填寫之個人資料（包含姓名、聯絡電話、電子信箱）僅作為「怪獸放電場」展覽預約使用，不作為其他商業用途，亦不會提供於第三方。本活動結束後，相關個人資料將依法定予以銷毀。送出此預約表單，即視為同意本活動之個人資料使用方式。</div>
+
+          <label class="consent">
+            <input type="checkbox" id="f-consent">
+            <span>我已閱讀入場注意事項，同意主辦單位為本次預約蒐集與使用上述個人資料。</span>
+          </label>
+
+          <p class="error-msg" id="formError" style="display:none;"></p>
+
+          <button class="btn-primary" type="submit">確認送出</button>
+        </form>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="step" data-step="4">
+        <div class="success-hero">
+          <span class="check">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M5 13l4 4L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <h2>預約成功！</h2>
+          <p>確認信已寄出，請到信箱收信。<br>沒收到請看看垃圾郵件匣。</p>
+        </div>
+
+        <div class="code-card">
+          <div class="cap">預約編號</div>
+          <div class="code" id="s4-code"></div>
+          <div style="text-align:left;">
+            <div class="summary-row"><span class="k">姓名</span><span class="v" id="s4-name"></span></div>
+            <div class="summary-row"><span class="k">日期</span><span class="v" id="s4-date"></span></div>
+            <div class="summary-row"><span class="k">場次</span><span class="v" id="s4-time"></span></div>
+            <div class="summary-row"><span class="k">人數</span><span class="v" id="s4-hc"></span></div>
+            <div class="summary-row"><span class="k">信箱</span><span class="v" id="s4-email" style="font-family:inherit;font-weight:600;"></span></div>
+          </div>
+        </div>
+
+        <details class="notice" open>
+          <summary>入場注意事項</summary>
+          <p>請於場次開始前 10 分鐘報到，逾時 15 分鐘未報到，名額將釋出給現場候補。出示確認信或預約憑證入場，每場放電 45 分鐘，預約不可取消或修改。</p>
+        </details>
+
+        <button class="btn-primary" id="restartBottom" type="button">回到首頁</button>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  var STEPS = ["選日期","場次＆人數","預約資料","完成"];
+  var TIME_SLOTS = ["10:00","10:35","11:10","11:45","13:30","14:05","14:40","15:15","15:50","16:25"];
+  var CAPACITY_PER_SLOT = 30;
+  var WEEKDAYS = ["日","一","二","三","四","五","六"];
+  var RANGE_START = new Date(2026,9,10);  // 10/10
+  var RANGE_END   = new Date(2026,11,27); // 12/27
+
+  var state = {
+    step: 1,
+    cursorYear: 2026,
+    cursorMonth: 10, // 1-indexed
+    selectedDate: null,   // {y,m,d,label}
+    selectedSlot: null,   // {time, remaining, capacity}
+    headcount: null,
+    result: null
+  };
+
+  function pad(n){ return n < 10 ? "0"+n : ""+n; }
+  function isMonday(y,m,d){ return new Date(y, m-1, d).getDay() === 1; }
+  function inRange(y,m,d){
+    var t = new Date(y, m-1, d);
+    return t >= RANGE_START && t <= RANGE_END;
+  }
+
+  // 這個瀏覽器裡「demo 送出過的預約」記錄（key = 日期#場次時間，value = 已訂人數）。
+  // 存 localStorage 只是方便你重新整理頁面不會被清掉；不會傳到任何伺服器，也不會影響其他人看到的畫面。
+  var STORAGE_KEY = "monsterBookingDemo:bookedCounts";
+  var bookedCounts = {};
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) bookedCounts = JSON.parse(saved);
+  } catch (e) { bookedCounts = {}; }
+
+  function saveBookedCounts(){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bookedCounts)); } catch (e) {}
+  }
+
+  function slotKey(y,m,d,time){ return y+"-"+pad(m)+"-"+pad(d)+"#"+time; }
+
+  function recordBooking(y,m,d,time,headcount){
+    var key = slotKey(y,m,d,time);
+    bookedCounts[key] = (bookedCounts[key] || 0) + headcount;
+    saveBookedCounts();
+  }
+
+  // Demo 假資料以「尚未有人預約」為起點：每個場次的剩餘名額＝場次人數上限 - 這個瀏覽器裡 demo 送出過的預約人數。
+  // 月曆上每天顯示的加總，直接把當天所有場次的剩餘名額加起來，這樣一定會跟點進去 Step 2 看到的數字一致，
+  // 而且你在這個 demo 裡送出預約後，回到月曆會看到名額真的減少了。
+  function dayInfo(y,m,d){
+    if (!inRange(y,m,d) || isMonday(y,m,d)) return { status:"closed" };
+    var slots = slotsFor(y,m,d);
+    var capacity = slots.reduce(function(sum, s){ return sum + s.capacity; }, 0);
+    var remaining = slots.reduce(function(sum, s){ return sum + s.remaining; }, 0);
+    if (remaining <= 0) return { status:"full", remaining:0 };
+    var ratio = remaining / capacity;
+    return { status: ratio <= 0.2 ? "low" : "available", remaining: remaining };
+  }
+
+  function slotsFor(y,m,d){
+    return TIME_SLOTS.map(function(time){
+      var booked = bookedCounts[slotKey(y,m,d,time)] || 0;
+      var remaining = Math.max(0, CAPACITY_PER_SLOT - booked);
+      return { time: time, remaining: remaining, capacity: CAPACITY_PER_SLOT };
+    });
+  }
+
+  // ---------- Progress bar ----------
+  var progressEl = document.getElementById("progress");
+  function renderProgress(){
+    progressEl.innerHTML = "";
+    STEPS.forEach(function(label, idx){
+      var n = idx+1;
+      var wrap = document.createElement("div");
+      wrap.className = "p-step" + (n === state.step ? " active" : n < state.step ? " done" : "");
+      wrap.innerHTML = '<span class="p-num">'+n+'</span><span class="p-label">'+label+'</span>';
+      progressEl.appendChild(wrap);
+      if (n !== STEPS.length){
+        var sep = document.createElement("span");
+        sep.className = "p-sep";
+        progressEl.appendChild(sep);
+      }
+    });
+  }
+
+  // ---------- Step switching ----------
+  var stepEls = Array.prototype.slice.call(document.querySelectorAll(".step"));
+  function goToStep(n){
+    state.step = n;
+    stepEls.forEach(function(el){
+      el.classList.toggle("active", Number(el.getAttribute("data-step")) === n);
+    });
+    renderProgress();
+    if (n === 1) renderCalendar();
+    if (n === 2) renderStep2();
+    if (n === 3) renderStep3();
+    if (n === 4) renderStep4();
+  }
+
+  document.querySelectorAll("[data-back]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      goToStep(Number(btn.getAttribute("data-back")));
+    });
+  });
+
+  function resetAll(){
+    state.selectedDate = null;
+    state.selectedSlot = null;
+    state.headcount = null;
+    state.result = null;
+    state.cursorYear = 2026;
+    state.cursorMonth = 10;
+    goToStep(1);
+  }
+  document.getElementById("restartTop").addEventListener("click", resetAll);
+  document.getElementById("restartBottom").addEventListener("click", resetAll);
+
+  document.getElementById("clearDemoData").addEventListener("click", function(){
+    bookedCounts = {};
+    saveBookedCounts();
+    resetAll();
+  });
+
+  // ---------- Step 1: Calendar ----------
+  var calTitle = document.getElementById("calTitle");
+  var calWeekdays = document.getElementById("calWeekdays");
+  var calDays = document.getElementById("calDays");
+
+  WEEKDAYS.forEach(function(w){
+    var el = document.createElement("div");
+    el.className = "cal-wd";
+    el.textContent = w;
+    calWeekdays.appendChild(el);
+  });
+
+  document.getElementById("prevMonth").addEventListener("click", function(){
+    state.cursorMonth -= 1;
+    if (state.cursorMonth < 1){ state.cursorMonth = 12; state.cursorYear -= 1; }
+    renderCalendar();
+  });
+  document.getElementById("nextMonth").addEventListener("click", function(){
+    state.cursorMonth += 1;
+    if (state.cursorMonth > 12){ state.cursorMonth = 1; state.cursorYear += 1; }
+    renderCalendar();
+  });
+
+  function renderCalendar(){
+    var y = state.cursorYear, m = state.cursorMonth;
+    calTitle.textContent = y + " 年 " + m + " 月";
+    calDays.innerHTML = "";
+
+    var firstWeekday = new Date(y, m-1, 1).getDay();
+    var daysInMonth = new Date(y, m, 0).getDate();
+
+    for (var i=0;i<firstWeekday;i++){
+      var empty = document.createElement("div");
+      empty.className = "cal-cell empty";
+      calDays.appendChild(empty);
+    }
+
+    for (var d=1; d<=daysInMonth; d++){
+      var info = dayInfo(y,m,d);
+      var cell = document.createElement("button");
+      cell.type = "button";
+      cell.className = "cal-cell " + info.status;
+      var dNum = document.createElement("span");
+      dNum.className = "d";
+      dNum.textContent = d;
+      cell.appendChild(dNum);
+
+      if (info.status === "available" || info.status === "low"){
+        var r = document.createElement("span");
+        r.className = "r";
+        r.textContent = "餘" + info.remaining;
+        cell.appendChild(r);
+        cell.addEventListener("click", (function(y,m,d){
+          return function(){
+            state.selectedDate = { y:y, m:m, d:d, label: y+"年"+m+"月"+d+"日" };
+            state.selectedSlot = null;
+            state.headcount = null;
+            goToStep(2);
+          };
+        })(y,m,d));
+      } else if (info.status === "full"){
+        var r2 = document.createElement("span");
+        r2.className = "r";
+        r2.textContent = "滿";
+        cell.appendChild(r2);
+        cell.disabled = true;
+      } else {
+        cell.disabled = true;
+      }
+      calDays.appendChild(cell);
+    }
+  }
+
+  // ---------- Step 2: Sessions & headcount ----------
+  var slotListEl = document.getElementById("slotList");
+  var headcountEl = document.getElementById("headcount");
+  var toStep3Btn = document.getElementById("toStep3");
+
+  function renderStep2(){
+    var sd = state.selectedDate;
+    document.getElementById("s2-date").textContent = sd.label;
+
+    var slots = slotsFor(sd.y, sd.m, sd.d);
+    slotListEl.innerHTML = "";
+    slots.forEach(function(slot){
+      var full = slot.remaining <= 0;
+      var ratio = slot.remaining / slot.capacity;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot" + (full ? " full" : "") + (state.selectedSlot && state.selectedSlot.time === slot.time ? " selected" : "");
+      btn.disabled = full;
+      btn.innerHTML =
+        '<div class="slot-top">' +
+          '<span class="slot-time">' + slot.time + '</span>' +
+          '<span class="slot-remaining' + (!full && ratio<=0.2 ? ' low':'') + '">' + (full ? "已滿" : "剩餘名額 " + slot.remaining) + '</span>' +
+        '</div>' +
+        '<div class="slot-bar"><i style="width:' + (full ? 100 : Math.max(4, ratio*100)) + '%"></i></div>';
+      if (!full){
+        btn.addEventListener("click", function(){
+          state.selectedSlot = slot;
+          renderStep2();
+        });
+      }
+      slotListEl.appendChild(btn);
+    });
+
+    headcountEl.innerHTML = "";
+    [1,2,3,4,5].forEach(function(n){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "hc-btn" + (state.headcount === n ? " active" : "");
+      b.textContent = n;
+      b.addEventListener("click", function(){
+        state.headcount = n;
+        renderStep2();
+      });
+      headcountEl.appendChild(b);
+    });
+
+    toStep3Btn.disabled = !(state.selectedSlot && state.headcount);
+  }
+
+  toStep3Btn.addEventListener("click", function(){
+    if (state.selectedSlot && state.headcount) goToStep(3);
+  });
+
+  // ---------- Step 3: Form ----------
+  function renderStep3(){
+    var sd = state.selectedDate;
+    document.getElementById("s3-date").textContent = sd.label;
+    document.getElementById("s3-time").textContent = state.selectedSlot.time;
+    document.getElementById("s3-hc").textContent = state.headcount + " 人";
+    document.getElementById("formError").style.display = "none";
+  }
+
+  document.getElementById("bookingForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var errorEl = document.getElementById("formError");
+    var consent = document.getElementById("f-consent").checked;
+    if (!consent){
+      errorEl.textContent = "請先閱讀並勾選入場注意事項與個資使用同意聲明。";
+      errorEl.style.display = "block";
+      return;
+    }
+    errorEl.style.display = "none";
+
+    var sd = state.selectedDate;
+    var yy = String(sd.y).slice(2);
+    var codeDate = yy + pad(sd.m) + pad(sd.d);
+    var rand = 1000 + Math.floor(Math.random()*9000);
+
+    recordBooking(sd.y, sd.m, sd.d, state.selectedSlot.time, state.headcount);
+
+    state.result = {
+      code: "M" + codeDate + "-" + rand,
+      name: document.getElementById("f-name").value.trim() || "訪客",
+      email: document.getElementById("f-email").value.trim(),
+      date: sd.label,
+      time: state.selectedSlot.time,
+      hc: state.headcount
+    };
+    goToStep(4);
+  });
+
+  // ---------- Step 4: Success ----------
+  function renderStep4(){
+    var r = state.result;
+    document.getElementById("s4-code").textContent = r.code;
+    document.getElementById("s4-name").textContent = r.name;
+    document.getElementById("s4-date").textContent = r.date;
+    document.getElementById("s4-time").textContent = r.time;
+    document.getElementById("s4-hc").textContent = r.hc + " 人";
+    document.getElementById("s4-email").textContent = r.email;
+  }
+
+  goToStep(1);
+})();
+</script>
