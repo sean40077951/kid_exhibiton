@@ -7,9 +7,13 @@ export const dynamic = "force-dynamic";
 // 登入保護在 src/middleware.ts 統一擋（比對 /api/admin/:path* 這裡不用重複判斷）。
 export async function GET(req: NextRequest) {
   const dateStr = req.nextUrl.searchParams.get("date");
+  const timeSlot = req.nextUrl.searchParams.get("timeSlot");
 
   const bookings = await prisma.booking.findMany({
-    where: dateStr ? { bookingDate: dateStringToUtcMidnight(dateStr) } : {},
+    where: {
+      ...(dateStr ? { bookingDate: dateStringToUtcMidnight(dateStr) } : {}),
+      ...(timeSlot ? { session: { timeSlot } } : {})
+    },
     include: { session: { select: { timeSlot: true } } },
     orderBy: { createdAt: "desc" },
     take: 200

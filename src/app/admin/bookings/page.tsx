@@ -14,23 +14,31 @@ type BookingRow = {
   timeSlot: string;
   status: string;
   checkedIn: boolean;
+  createdAt: string;
 };
+
+// 場次時間固定樣板（同一份清單也用在 prisma/seed.ts），這裡拿來當篩選選單用。
+const TIME_SLOTS = ["10:00", "10:35", "11:10", "11:45", "13:30", "14:05", "14:40", "15:15", "15:50", "16:25"];
 
 export default function AdminBookingsPage() {
   const router = useRouter();
   const [date, setDate] = useState("");
+  const [timeSlot, setTimeSlot] = useState("");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    const qs = date ? `?date=${date}` : "";
+    const params = new URLSearchParams();
+    if (date) params.set("date", date);
+    if (timeSlot) params.set("timeSlot", timeSlot);
+    const qs = params.toString() ? `?${params.toString()}` : "";
     fetch(`/api/admin/bookings${qs}`)
       .then((r) => r.json())
       .then((data) => setRows(data.bookings ?? []))
       .finally(() => setLoading(false));
-  }, [date]);
+  }, [date, timeSlot]);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -57,7 +65,7 @@ export default function AdminBookingsPage() {
         </button>
       </div>
 
-      <div className="mb-4 flex items-center gap-2">
+      <div className="mb-4 flex items-center gap-3">
         <label className="text-sm">
           日期
           <input
@@ -66,6 +74,21 @@ export default function AdminBookingsPage() {
             onChange={(e) => setDate(e.target.value)}
             className="ml-2 rounded border border-black/20 px-2 py-1"
           />
+        </label>
+        <label className="text-sm">
+          場次
+          <select
+            value={timeSlot}
+            onChange={(e) => setTimeSlot(e.target.value)}
+            className="ml-2 rounded border border-black/20 px-2 py-1"
+          >
+            <option value="">全部</option>
+            {TIME_SLOTS.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
         </label>
         {loading && <span className="text-sm opacity-60">載入中…</span>}
       </div>
@@ -83,6 +106,7 @@ export default function AdminBookingsPage() {
               <Th>人數</Th>
               <Th>狀態</Th>
               <Th>到場</Th>
+              <Th>預約時間戳記</Th>
             </tr>
           </thead>
           <tbody>
@@ -97,11 +121,23 @@ export default function AdminBookingsPage() {
                 <Td>{r.headcount}</Td>
                 <Td>{r.status}</Td>
                 <Td>{r.checkedIn ? "已到場" : "未到場"}</Td>
+                <Td>
+                  {new Date(r.createdAt).toLocaleString("zh-TW", {
+                    timeZone: "Asia/Taipei",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: false
+                  })}
+                </Td>
               </tr>
             ))}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={9} className="p-4 text-center opacity-60">
+                <td colSpan={10} className="p-4 text-center opacity-60">
                   沒有符合條件的預約
                 </td>
               </tr>
