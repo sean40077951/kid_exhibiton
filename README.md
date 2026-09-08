@@ -2,19 +2,6 @@
 
 依 `PROJECT_SPEC.md` 產生的初步雛形，重點放在**流程與資料邏輯**（月曆選日期 → 場次與人數 → 填資料 → 完成，以及名額原子扣減與去重）。介面視覺目前用佔位色票，等拿到品牌風格圖片後再套用。
 
-## 本機啟動
-
-```bash
-npm install
-docker compose up -d          # 啟動本機 PostgreSQL
-cp .env.example .env          # 依需要調整
-npm run prisma:migrate        # 建表
-npm run prisma:seed           # 灌入展會設定、場次樣板、展開展期內所有場次
-npm run dev                   # http://localhost:3000
-```
-
-後台（需先登入）：`http://localhost:3000/admin/login`
-（帳密＝ `.env` 的 `ADMIN_EMAIL` / `ADMIN_PASSWORD`，執行過 `npm run prisma:seed` 才會建立這個帳號）
 
 ## 已實作
 

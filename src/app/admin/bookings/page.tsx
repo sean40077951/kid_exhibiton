@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 type BookingRow = {
   id: string;
@@ -21,12 +20,11 @@ type BookingRow = {
 const TIME_SLOTS = ["10:00", "10:35", "11:10", "11:45", "13:30", "14:05", "14:40", "15:15", "15:50", "16:25"];
 
 export default function AdminBookingsPage() {
-  const router = useRouter();
   const [date, setDate] = useState("");
   const [timeSlot, setTimeSlot] = useState("");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -40,30 +38,25 @@ export default function AdminBookingsPage() {
       .finally(() => setLoading(false));
   }, [date, timeSlot]);
 
-  async function handleLogout() {
-    setLoggingOut(true);
+  async function toggleCheckedIn(id: string, checkedIn: boolean) {
+    setSavingId(id);
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
-      router.push("/admin/login");
-      router.refresh();
+      const res = await fetch(`/api/admin/bookings/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkedIn })
+      });
+      if (res.ok) {
+        setRows((prev) => prev.map((r) => (r.id === id ? { ...r, checkedIn } : r)));
+      }
     } finally {
-      setLoggingOut(false);
+      setSavingId(null);
     }
   }
 
   return (
     <main className="mx-auto max-w-5xl p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold">預約查詢</h1>
-        <button
-          type="button"
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className="rounded border border-black/20 px-3 py-1 text-sm hover:bg-black/5 disabled:opacity-40"
-        >
-          {loggingOut ? "登出中…" : "登出"}
-        </button>
-      </div>
+      <h1 className="mb-4 text-xl font-bold">預約查詢</h1>
 
       <div className="mb-4 flex items-center gap-3">
         <label className="text-sm">
@@ -120,7 +113,17 @@ export default function AdminBookingsPage() {
                 <Td>{r.timeSlot}</Td>
                 <Td>{r.headcount}</Td>
                 <Td>{r.status}</Td>
-                <Td>{r.checkedIn ? "已到場" : "未到場"}</Td>
+                <Td>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={r.checkedIn}
+                      onChange={(e) => toggleCheckedIn(r.id, e.target.checked)}
+                      disabled={savingId === r.id}
+                    />
+                    {r.checkedIn ? "已到場" : "未到場"}
+                  </label>
+                </Td>
                 <Td>
                   {new Date(r.createdAt).toLocaleString("zh-TW", {
                     timeZone: "Asia/Taipei",
