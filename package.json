@@ -12,7 +12,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
-    "test:logic": "tsx scripts/test-logic.ts"
+    "test:logic": "tsx scripts/test-logic.ts",
+    "loadtest:booking": "tsx scripts/load-test-booking.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -26,6 +26,7 @@ npm run dev                   # http://localhost:3000
 - Turnstile 驗證骨架：後端已有驗證流程，`TURNSTILE_SECRET` 未設定時開發模式自動跳過（`verifyTurnstile`）
 - **後台登入**：`/admin/*` 與 `/api/admin/*` 由 `src/middleware.ts` 統一擋下未登入請求；密碼 bcrypt 雜湊存資料庫，登入後發一個簽章 session cookie（`src/lib/admin-session.ts`，7 天效期，竄改／過期都會被拒絕）
 - 輕量純邏輯測試：`npm run test:logic`（不需要資料庫，涵蓋正規化、分階段開放判斷、預約編號格式、時區換算、session 簽章驗證共 22 條斷言）
+- **搶名額壓力測試腳本**：`npm run loadtest:booking`（需要資料庫連線才能跑，見下方說明）
 
 ## 尚未實作／待確認事項（依 PROJECT_SPEC.md 第 11 節，動工前應詢問業主，不要自行假設）
 
@@ -35,7 +36,18 @@ npm run dev                   # http://localhost:3000
 4. 發信服務（Resend/SES）尚未串接，`src/lib/mailer.ts` 目前只是 console.log 佔位，也尚未做成佇列非同步。
 5. 後台名額管理、資料匯出（Excel/CSV）、通知信手動發送、前一日自動提醒排程、統計報表：規格第 7 節列出的後台功能，目前只做完「登入」跟「預約查詢」。
 6. Rate limiting、資料保存期限自動銷毀、DB 靜態加密、Log 遮蔽個資：屬部署/維運層機制，尚未實作。
-7. 上線前需壓力測試名額搶購情境（第 3.1 節），雛形尚未寫測試腳本。
+7. ~~上線前需壓力測試名額搶購情境（第 3.1 節）~~ → 測試腳本已寫好（`scripts/load-test-booking.ts`），本機沒裝 k6／Apache Bench，改用 Node 內建 fetch 模擬併發請求。**還沒有資料庫連線可以實際跑過一次**，見下方「壓力測試」。
+
+## 壓力測試（PROJECT_SPEC.md 第 3.1 節）
+
+驗證「大量人同時搶同一場次最後名額」不會超賣、回應時間可接受：
+
+```bash
+npm run dev                                   # 另開一個終端機跑 dev server
+npm run loadtest:booking http://localhost:3000 200   # 200 = 併發請求數，可自行調整
+```
+
+腳本會自動找一個場次、重設成滿額，同時送出 N 筆併發預約請求，跑完直接查資料庫比對「HTTP 成功筆數」「實際 Booking 筆數」「剩餘名額」三者是否完全吻合，並印出回應時間的 min/avg/p95/max。**需要一個真的能連線的 PostgreSQL 才能跑**（本機 Docker、Neon 免費雲端、或 Zeabur 上的資料庫都可以）。
 
 ## 介面視覺
 
