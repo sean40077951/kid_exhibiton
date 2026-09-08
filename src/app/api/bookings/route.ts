@@ -146,6 +146,12 @@ export async function POST(req: NextRequest) {
         }
       }
       throw lastError instanceof Error ? lastError : new Error("預約編號產生失敗，請再試一次");
+    }, {
+      // 預設 maxWait 只有 2000ms：短時間大量搶同一場次時，連線池來不及在 2 秒內排到這筆請求，
+      // Prisma 會直接丟 「Unable to start a transaction in the given time」，變成使用者看到伺服器錯誤，
+      // 而不是「已額滿」這種正常結果。拉長到 10 秒讓請求排隊等連線，而不是直接被打槍。
+      maxWait: 10000,
+      timeout: 10000
     });
 
     sendConfirmationEmail({
