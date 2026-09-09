@@ -4,13 +4,11 @@ import { useState } from "react";
 
 type SessionOption = { id: string; timeSlot: string };
 
-export type BookingResult = {
-  bookingCode: string;
+export type PendingBookingInput = {
   name: string;
+  phone: string;
   email: string;
-  date: string;
-  timeSlot: string;
-  headcount: number;
+  website: string; // honeypot，原樣往下傳
 };
 
 export default function StepForm({
@@ -19,24 +17,23 @@ export default function StepForm({
   headcount,
   consentText,
   onBack,
-  onDone
+  onReviewReady
 }: {
   dateStr: string;
   session: SessionOption;
   headcount: number;
   consentText: string;
   onBack: () => void;
-  onDone: (result: BookingResult) => void;
+  onReviewReady: (input: PendingBookingInput) => void;
 }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
   const [website, setWebsite] = useState(""); // honeypot
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
@@ -45,32 +42,9 @@ export default function StepForm({
       return;
     }
 
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: session.id,
-          name,
-          phone,
-          email,
-          headcount,
-          consent: true,
-          website
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "送出失敗，請稍後再試一次");
-        return;
-      }
-      onDone(data);
-    } catch {
-      setError("網路異常，請稍後再試一次");
-    } finally {
-      setSubmitting(false);
-    }
+    // 這一步只做欄位檢查，不直接送出，先進到「確認資料」頁面讓使用者再看一次
+    // （業主須知回覆 5-2：不能取消或修改，所以送出前多一層防呆）。
+    onReviewReady({ name, phone, email, website });
   }
 
   return (
@@ -148,12 +122,8 @@ export default function StepForm({
 
       {error && <p className="text-sm font-bold text-brand-danger">{error}</p>}
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full rounded-xl bg-brand-primary py-3 font-bold text-white disabled:opacity-40"
-      >
-        {submitting ? "送出中…" : "確認送出"}
+      <button type="submit" className="w-full rounded-xl bg-brand-primary py-3 font-bold text-white">
+        下一步：確認資料
       </button>
     </form>
   );

@@ -12,7 +12,6 @@ type BookingRow = {
   date: string;
   timeSlot: string;
   status: string;
-  checkedIn: boolean;
   createdAt: string;
 };
 
@@ -24,7 +23,6 @@ export default function AdminBookingsPage() {
   const [timeSlot, setTimeSlot] = useState("");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -37,22 +35,6 @@ export default function AdminBookingsPage() {
       .then((data) => setRows(data.bookings ?? []))
       .finally(() => setLoading(false));
   }, [date, timeSlot]);
-
-  async function toggleCheckedIn(id: string, checkedIn: boolean) {
-    setSavingId(id);
-    try {
-      const res = await fetch(`/api/admin/bookings/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ checkedIn })
-      });
-      if (res.ok) {
-        setRows((prev) => prev.map((r) => (r.id === id ? { ...r, checkedIn } : r)));
-      }
-    } finally {
-      setSavingId(null);
-    }
-  }
 
   return (
     <main className="mx-auto max-w-5xl p-6">
@@ -98,7 +80,6 @@ export default function AdminBookingsPage() {
               <Th>場次</Th>
               <Th>人數</Th>
               <Th>狀態</Th>
-              <Th>到場</Th>
               <Th>預約時間戳記</Th>
             </tr>
           </thead>
@@ -113,17 +94,6 @@ export default function AdminBookingsPage() {
                 <Td>{r.timeSlot}</Td>
                 <Td>{r.headcount}</Td>
                 <Td>{r.status}</Td>
-                <Td>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={r.checkedIn}
-                      onChange={(e) => toggleCheckedIn(r.id, e.target.checked)}
-                      disabled={savingId === r.id}
-                    />
-                    {r.checkedIn ? "已到場" : "未到場"}
-                  </label>
-                </Td>
                 <Td>
                   {new Date(r.createdAt).toLocaleString("zh-TW", {
                     timeZone: "Asia/Taipei",
@@ -140,7 +110,7 @@ export default function AdminBookingsPage() {
             ))}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={10} className="p-4 text-center opacity-60">
+                <td colSpan={9} className="p-4 text-center opacity-60">
                   沒有符合條件的預約
                 </td>
               </tr>

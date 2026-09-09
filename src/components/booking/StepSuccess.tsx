@@ -1,4 +1,4 @@
-import type { BookingResult } from "./StepForm";
+import type { BookingResult } from "./StepConfirm";
 
 export default function StepSuccess({
   result,

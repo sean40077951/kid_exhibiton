@@ -4,14 +4,17 @@ import { useEffect, useState } from "react";
 import ProgressBar from "./ProgressBar";
 import StepCalendar from "./StepCalendar";
 import StepSessions from "./StepSessions";
-import StepForm, { type BookingResult } from "./StepForm";
+import StepForm, { type PendingBookingInput } from "./StepForm";
+import StepConfirm, { type BookingResult } from "./StepConfirm";
 import StepSuccess from "./StepSuccess";
+import { formatDate, todayDateStringInTaipei } from "@/lib/timezone";
 
 type EventConfig = {
   name: string;
   bannerText: string;
   noticeText: string;
   consentText: string;
+  dateRangeEnd: string;
 };
 
 type SessionOption = { id: string; timeSlot: string; capacity: number; remaining: number };
@@ -22,6 +25,7 @@ export default function BookingWizard() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<SessionOption | null>(null);
   const [headcount, setHeadcount] = useState<number | null>(null);
+  const [pendingInput, setPendingInput] = useState<PendingBookingInput | null>(null);
   const [result, setResult] = useState<BookingResult | null>(null);
 
   useEffect(() => {
@@ -36,7 +40,25 @@ export default function BookingWizard() {
     setSelectedDate(null);
     setSelectedSession(null);
     setHeadcount(null);
+    setPendingInput(null);
     setResult(null);
+  }
+
+  // 展期結束後頁面全部關閉（業主須知回覆 4-2），不只是月曆變灰，要有明確的結束畫面。
+  const eventEnded = event ? todayDateStringInTaipei() > formatDate(event.dateRangeEnd, "yyyy-MM-dd") : false;
+
+  if (eventEnded) {
+    return (
+      <div className="mx-auto max-w-xl px-4 py-6">
+        <header className="mb-5 flex items-center justify-between">
+          <div className="text-lg font-bold text-brand-primary-dark">怪獸放電場</div>
+        </header>
+        <section className="rounded-3xl bg-brand-panel p-8 text-center shadow-sm">
+          <p className="text-xl font-bold text-brand-primary-dark">本次活動已結束</p>
+          <p className="mt-3 text-sm opacity-80">感謝大家的參與，期待未來還有機會再相見！</p>
+        </section>
+      </div>
+    );
   }
 
   return (
@@ -78,13 +100,24 @@ export default function BookingWizard() {
           />
         )}
 
-        {step === 3 && selectedDate && selectedSession && headcount && (
+        {step === 3 && selectedDate && selectedSession && headcount && !pendingInput && (
           <StepForm
             dateStr={selectedDate}
             session={selectedSession}
             headcount={headcount}
             consentText={event?.consentText ?? ""}
             onBack={() => setStep(2)}
+            onReviewReady={(input) => setPendingInput(input)}
+          />
+        )}
+
+        {step === 3 && selectedDate && selectedSession && headcount && pendingInput && (
+          <StepConfirm
+            dateStr={selectedDate}
+            session={selectedSession}
+            headcount={headcount}
+            input={pendingInput}
+            onBack={() => setPendingInput(null)}
             onDone={(res) => {
               setResult(res);
               setStep(4);

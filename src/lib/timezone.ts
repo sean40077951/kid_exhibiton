@@ -19,3 +19,14 @@ export function todayDateStringInTaipei(): string {
 export function dateStringToUtcMidnight(dateStr: string): Date {
   return new Date(`${dateStr}T00:00:00+08:00`);
 }
+
+const BOOKING_CUTOFF_MINUTES = 15;
+
+// 場次開始前 15 分鐘自動停止該場次預約（業主須知回覆 4-2）。
+// 用「現在時間」跟「場次開始時間 - 15 分鐘」比較，即時計算，不需要排程去改資料庫欄位。
+export function isPastBookingCutoff(sessionDate: Date, timeSlot: string, now: Date = new Date()): boolean {
+  const dateStr = formatDate(sessionDate, "yyyy-MM-dd");
+  const sessionStart = new Date(`${dateStr}T${timeSlot}:00+08:00`);
+  const cutoff = new Date(sessionStart.getTime() - BOOKING_CUTOFF_MINUTES * 60 * 1000);
+  return now >= cutoff;
+}

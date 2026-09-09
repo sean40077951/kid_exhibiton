@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { dateStringToUtcMidnight, formatDate, todayDateStringInTaipei } from "@/lib/timezone";
+import { dateStringToUtcMidnight, formatDate, isPastBookingCutoff, todayDateStringInTaipei } from "@/lib/timezone";
 import { isMonthOpen, type PhaseOpenRule } from "@/lib/phase-rules";
 
 export const dynamic = "force-dynamic";
@@ -36,12 +36,15 @@ export async function GET(req: NextRequest) {
   const sessions = monthOpen
     ? await prisma.session.findMany({
         where: { eventId: event.id, date: { gte: monthStart, lte: monthEnd } },
-        select: { date: true, remaining: true, capacity: true, isOpen: true }
+        select: { date: true, timeSlot: true, remaining: true, capacity: true, isOpen: true }
       })
     : [];
 
   const byDate = new Map<string, { remaining: number; capacity: number; anyOpen: boolean }>();
   for (const s of sessions) {
+    // 場次開始前 15 分鐘自動停止預約（4-2），這種場次不該再算進「可預約」的加總裡。
+    if (isPastBookingCutoff(s.date, s.timeSlot)) continue;
+
     const key = formatDate(s.date, "yyyy-MM-dd");
     const agg = byDate.get(key) ?? { remaining: 0, capacity: 0, anyOpen: false };
     if (s.isOpen) {

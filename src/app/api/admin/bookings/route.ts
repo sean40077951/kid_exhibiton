@@ -30,7 +30,6 @@ export async function GET(req: NextRequest) {
       date: formatDate(b.bookingDate, "yyyy-MM-dd"),
       timeSlot: b.session.timeSlot,
       status: b.status,
-      checkedIn: b.checkedIn,
       createdAt: b.createdAt
     }))
   });

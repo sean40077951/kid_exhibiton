@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { normalizeEmail, normalizePhone } from "@/lib/normalize";
 import { generateBookingCode } from "@/lib/booking-code";
 import { sendConfirmationEmail } from "@/lib/mailer";
-import { formatDate } from "@/lib/timezone";
+import { formatDate, isPastBookingCutoff } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +35,7 @@ const bodySchema = z.object({
 });
 
 class BookingError extends Error {
-  code: "FULL" | "DUPLICATE" | "SESSION_NOT_FOUND" | "SESSION_CLOSED";
+  code: "FULL" | "SESSION_NOT_FOUND" | "SESSION_CLOSED" | "PAST_CUTOFF";
   constructor(code: BookingError["code"], message: string) {
     super(message);
     this.code = code;
@@ -96,6 +96,13 @@ export async function POST(req: NextRequest) {
     if (!session.isOpen) {
       return NextResponse.json({ error: "此場次已關閉，請重新選擇" }, { status: 409 });
     }
+    // 場次開始前 15 分鐘自動停止預約（業主須知回覆 4-2），即時計算，不用排程改資料庫。
+    if (isPastBookingCutoff(session.date, session.timeSlot)) {
+      return NextResponse.json(
+        { error: "此場次即將開始，已停止接受預約，請選擇其他場次" },
+        { status: 409 }
+      );
+    }
 
     const booking = await prisma.$transaction(async (tx) => {
       // 原子扣減：單一 UPDATE + WHERE remaining >= headcount，
@@ -133,14 +140,11 @@ export async function POST(req: NextRequest) {
             }
           });
         } catch (e) {
+          // 「每日每人限一次」去重已依業主指示取消（4-1），所以這裡唯一還可能撞到的
+          // 只剩 bookingCode 本身的唯一索引（極小機率的隨機碼碰撞），重試即可。
           if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-            const target = (e.meta?.target as string[] | undefined)?.join(",") ?? "";
-            if (target.includes("bookingCode")) {
-              lastError = e;
-              continue; // 編號碰撞，重試新的隨機碼
-            }
-            // email 或 phone 命中「同展會同日已預約」唯一索引
-            throw new BookingError("DUPLICATE", "此電話或信箱於同一天已完成預約，如需協助請聯繫主辦單位");
+            lastError = e;
+            continue;
           }
           throw e;
         }
@@ -174,8 +178,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (e) {
     if (e instanceof BookingError) {
-      const status = e.code === "DUPLICATE" ? 409 : 409;
-      return NextResponse.json({ error: e.message, code: e.code }, { status });
+      return NextResponse.json({ error: e.message, code: e.code }, { status: 409 });
     }
     console.error("[bookings] 建立預約失敗", e);
     return NextResponse.json({ error: "系統忙碌中，請稍後再試一次" }, { status: 500 });

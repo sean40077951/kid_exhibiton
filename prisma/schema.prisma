@@ -89,14 +89,14 @@ model Booking {
   status    String  @default("pending") // pending / confirmed / cancelled（僅後台特殊情況）
   checkedIn Boolean @default(false)
 
-  bookingDate DateTime // 使用者選擇的預約日期（不是 createdAt），用於「每日每人限一次」去重
+  bookingDate DateTime // 使用者選擇的預約日期
 
   reminderSentAt DateTime? // 前一日提醒信是否已寄送，防止排程重複寄送
 
   createdAt DateTime @default(now())
 
-  @@unique([eventId, bookingDate, emailNormalized])
-  @@unique([eventId, bookingDate, phoneNormalized])
+  // 「每日每人限一次」去重規則已依業主指示取消（見對業主須知回覆 4-1），全面開放，
+  // 同一人可重複預約。phoneNormalized / emailNormalized 兩欄保留，之後後台搜尋還用得到。
   @@index([eventId, sessionId])
 }
 
