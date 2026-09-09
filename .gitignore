@@ -6,3 +6,7 @@ out/
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# 業主提供的原始設計素材包（EPS/PDF/PSD/AI，89MB）——只是參考來源，
+# 網站實際會用到的字型/圖片已經抽取進 public/ 了，不需要把整包塞進 git。
+/ui/

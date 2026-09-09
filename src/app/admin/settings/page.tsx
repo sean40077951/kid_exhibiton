@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Button from "@/components/ui/Button";
 
 export default function AdminSettingsPage() {
   const [bannerText, setBannerText] = useState("");
@@ -39,36 +40,33 @@ export default function AdminSettingsPage() {
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 className="mb-4 text-xl font-bold">活動設定</h1>
+      <h1 className="mb-4 font-display text-xl font-bold text-ink">活動設定</h1>
 
-      <div className="rounded-lg border border-black/10 p-4">
+      <div className="rounded-eight border-[3px] border-ink bg-card p-4 shadow-hardsm">
         <label className="block text-sm">
-          <span className="mb-1 block font-bold">布告欄文字</span>
-          <span className="mb-2 block text-xs opacity-60">顯示在前台選日期頁面上方，可隨時更新（例如臨時休館公告）</span>
+          <span className="mb-1 block font-bold text-ink">布告欄文字</span>
+          <span className="mb-2 block text-xs text-muted">顯示在前台選日期頁面上方，可隨時更新（例如臨時休館公告）</span>
           {loading ? (
-            <p className="text-sm opacity-60">載入中…</p>
+            <p className="text-sm text-muted">載入中…</p>
           ) : (
             <textarea
               value={bannerText}
               onChange={(e) => setBannerText(e.target.value)}
               rows={4}
               maxLength={500}
-              className="w-full rounded border border-black/20 px-3 py-2"
+              className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
             />
           )}
         </label>
 
-        {message && <p className="mt-2 text-sm font-bold text-green-700">{message}</p>}
-        {error && <p className="mt-2 text-sm font-bold text-red-600">{error}</p>}
+        {message && <p className="mt-2 text-sm font-bold text-green">{message}</p>}
+        {error && <p className="mt-2 text-sm font-bold text-red">{error}</p>}
 
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={loading || saving}
-          className="mt-3 rounded bg-black px-4 py-2 text-sm font-bold text-white disabled:opacity-40"
-        >
-          {saving ? "儲存中…" : "儲存"}
-        </button>
+        <div className="mt-3 max-w-xs">
+          <Button type="button" variant="continue" onClick={handleSave} disabled={loading || saving}>
+            {saving ? "儲存中…" : "儲存"}
+          </Button>
+        </div>
       </div>
     </main>
   );

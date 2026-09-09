@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -35,40 +36,38 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center p-6">
-      <h1 className="mb-6 text-xl font-bold">後台登入</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <label className="block text-sm">
-          帳號
-          <input
-            type="email"
-            required
-            autoComplete="username"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded border border-black/20 px-3 py-2"
-          />
-        </label>
-        <label className="block text-sm">
-          密碼
-          <input
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded border border-black/20 px-3 py-2"
-          />
-        </label>
-        {error && <p className="text-sm font-bold text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded bg-black py-2 font-bold text-white disabled:opacity-40"
-        >
-          {submitting ? "登入中…" : "登入"}
-        </button>
-      </form>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-paper p-6">
+      <div className="w-full max-w-sm rounded-blob border-[3px] border-ink bg-card p-6 shadow-hardlg">
+        <h1 className="mb-6 font-display text-xl font-bold text-ink">怪獸放電場｜後台登入</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <label className="block text-sm font-bold text-ink">
+            帳號
+            <input
+              type="email"
+              required
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 h-10 w-full rounded-eight border-2 border-ink bg-card px-3 font-normal focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
+            />
+          </label>
+          <label className="block text-sm font-bold text-ink">
+            密碼
+            <input
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 h-10 w-full rounded-eight border-2 border-ink bg-card px-3 font-normal focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
+            />
+          </label>
+          {error && <p className="text-sm font-bold text-red">{error}</p>}
+          <Button type="submit" variant="continue" disabled={submitting}>
+            {submitting ? "登入中…" : "登入"}
+          </Button>
+        </form>
+      </div>
     </main>
   );
 }

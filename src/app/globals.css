@@ -2,11 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 怪獸放電場自架字型（ui/fonts/webfonts/fonts.css 的網站版）。
+   兩階段中文載入：介面固定文案用 584 字精簡版（快），使用者輸入的罕用字
+   才會落到完整版，首屏不用背 3.8MB 的字重。 */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/fonts/BricolageGrotesque-latin.woff2") format("woff2-variations");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans TC";
+  src: url("/fonts/NotoSansTC-ui.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans TC Ext";
+  src: url("/fonts/NotoSansTC-common.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 html,
 body {
   height: 100%;
 }
 
 body {
-  @apply bg-brand-bg text-brand-primary-dark font-sans;
+  @apply bg-paper text-ink font-sans;
+}
+
+/* 頁首跑馬燈（ui/_preview/09_頁首彈窗與驗證.png）：22 秒無縫循環，向左位移 50%。 */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 22s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }

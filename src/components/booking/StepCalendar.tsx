@@ -7,11 +7,13 @@ type DayInfo = { status: DayStatus; remaining?: number };
 
 const WEEKDAY_LABELS = ["日", "一", "二", "三", "四", "五", "六"];
 
+// 六種日期狀態規範（ui/_preview/03_月曆.png）：open/tight/full 是即時算出來的，
+// closed/notopen/past 目前後端統一回傳 "closed"，畫面上都用同一種灰階樣式呈現。
 const STATUS_STYLE: Record<DayStatus, string> = {
-  available: "bg-brand-success text-white hover:brightness-110 cursor-pointer",
-  low: "bg-brand-warning text-brand-primary-dark hover:brightness-110 cursor-pointer",
-  full: "bg-brand-primary-dark/30 text-brand-primary-dark/60 cursor-not-allowed",
-  closed: "bg-transparent text-brand-primary-dark/30 cursor-not-allowed"
+  available: "bg-green text-white border-ink cursor-pointer",
+  low: "bg-yellow text-ink border-ink cursor-pointer",
+  full: "bg-stone text-white border-ink cursor-not-allowed",
+  closed: "bg-transparent text-line border-line cursor-not-allowed"
 };
 
 export default function StepCalendar({
@@ -64,41 +66,31 @@ export default function StepCalendar({
   return (
     <div className="space-y-4">
       {bannerText && (
-        <div className="rounded-lg bg-brand-primary/10 px-4 py-2 text-sm text-brand-primary-dark">
+        <div className="rounded-eight border-[3px] border-ink bg-navy px-4 py-3 text-sm font-bold text-white shadow-hardsm">
           {bannerText}
         </div>
       )}
 
-      <div className="rounded-2xl bg-white/70 p-4">
+      <div className="rounded-toy border-[3px] border-ink bg-card p-4 shadow-hardsm">
         <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => changeMonth(-1)}
-            className="rounded-full px-3 py-1 text-lg hover:bg-black/5"
-            aria-label="上個月"
-          >
+          <IconButton onClick={() => changeMonth(-1)} label="上個月">
             ‹
-          </button>
-          <h2 className="text-lg font-bold">
+          </IconButton>
+          <h2 className="font-display text-lg font-bold text-ink">
             {cursor.year} 年 {cursor.month} 月
           </h2>
-          <button
-            type="button"
-            onClick={() => changeMonth(1)}
-            className="rounded-full px-3 py-1 text-lg hover:bg-black/5"
-            aria-label="下個月"
-          >
+          <IconButton onClick={() => changeMonth(1)} label="下個月">
             ›
-          </button>
+          </IconButton>
         </div>
 
-        <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold opacity-70">
+        <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-muted">
           {WEEKDAY_LABELS.map((w) => (
             <div key={w}>{w}</div>
           ))}
         </div>
 
-        <div className="mt-1 grid grid-cols-7 gap-1">
+        <div className="mt-1 grid grid-cols-7 gap-1.5">
           {cells.map((dateStr, idx) => {
             if (!dateStr) return <div key={idx} />;
             const info = days[dateStr];
@@ -111,7 +103,7 @@ export default function StepCalendar({
                 type="button"
                 disabled={!clickable || loading}
                 onClick={() => onSelect(dateStr)}
-                className={`flex h-14 flex-col items-center justify-center rounded-lg text-sm transition ${STATUS_STYLE[status]}`}
+                className={`flex aspect-square flex-col items-center justify-center rounded-eight border-[2.5px] font-display text-sm transition ${STATUS_STYLE[status]}`}
               >
                 <span className="font-bold">{dayNum}</span>
                 {typeof info?.remaining === "number" && status !== "full" && (
@@ -123,21 +115,42 @@ export default function StepCalendar({
           })}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-3 text-xs">
-          <LegendDot className="bg-brand-success" label="可預約" />
-          <LegendDot className="bg-brand-warning" label="名額緊張" />
-          <LegendDot className="bg-brand-primary-dark/30" label="額滿" />
-          <LegendDot className="border border-brand-primary-dark/30 bg-transparent" label="休館／未開放" />
+        <div className="mt-4 flex flex-wrap gap-3 border-t-[3px] border-dashed border-line pt-3 text-xs text-muted">
+          <LegendDot className="bg-green" label="可預約" />
+          <LegendDot className="bg-yellow" label="名額緊張" />
+          <LegendDot className="bg-stone" label="額滿" />
+          <LegendDot className="border border-line bg-transparent" label="休館／未開放" />
         </div>
       </div>
     </div>
   );
 }
 
+function IconButton({
+  onClick,
+  label,
+  children
+}: {
+  onClick: () => void;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="flex h-9 w-9 items-center justify-center rounded-eight border-2 border-ink text-lg text-ink hover:bg-line/40"
+    >
+      {children}
+    </button>
+  );
+}
+
 function LegendDot({ className, label }: { className: string; label: string }) {
   return (
     <span className="flex items-center gap-1">
-      <span className={`inline-block h-3 w-3 rounded ${className}`} />
+      <span className={`inline-block h-3 w-3 rounded-eight border border-ink/30 ${className}`} />
       {label}
     </span>
   );

@@ -38,24 +38,24 @@ export default function AdminBookingsPage() {
 
   return (
     <main className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-4 text-xl font-bold">預約查詢</h1>
+      <h1 className="mb-4 font-display text-xl font-bold text-ink">預約查詢</h1>
 
       <div className="mb-4 flex items-center gap-3">
-        <label className="text-sm">
+        <label className="text-sm font-bold text-ink">
           日期
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="ml-2 rounded border border-black/20 px-2 py-1"
+            className="ml-2 rounded-eight border-2 border-ink bg-card px-2 py-1 font-normal"
           />
         </label>
-        <label className="text-sm">
+        <label className="text-sm font-bold text-ink">
           場次
           <select
             value={timeSlot}
             onChange={(e) => setTimeSlot(e.target.value)}
-            className="ml-2 rounded border border-black/20 px-2 py-1"
+            className="ml-2 rounded-eight border-2 border-ink bg-card px-2 py-1 font-normal"
           >
             <option value="">全部</option>
             {TIME_SLOTS.map((t) => (
@@ -65,12 +65,12 @@ export default function AdminBookingsPage() {
             ))}
           </select>
         </label>
-        {loading && <span className="text-sm opacity-60">載入中…</span>}
+        {loading && <span className="text-sm text-muted">載入中…</span>}
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-black/10">
+      <div className="overflow-x-auto rounded-eight border-[3px] border-ink bg-card shadow-hardsm">
         <table className="w-full text-sm">
-          <thead className="bg-black/5">
+          <thead className="bg-line/40">
             <tr>
               <Th>預約編號</Th>
               <Th>姓名</Th>
@@ -85,8 +85,8 @@ export default function AdminBookingsPage() {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="border-t border-black/5">
-                <Td>{r.bookingCode}</Td>
+              <tr key={r.id} className="border-t border-line">
+                <Td className="font-display font-bold">{r.bookingCode}</Td>
                 <Td>{r.name}</Td>
                 <Td>{r.phone}</Td>
                 <Td>{r.email}</Td>
@@ -110,7 +110,7 @@ export default function AdminBookingsPage() {
             ))}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={9} className="p-4 text-center opacity-60">
+                <td colSpan={9} className="p-4 text-center text-muted">
                   沒有符合條件的預約
                 </td>
               </tr>
@@ -123,8 +123,8 @@ export default function AdminBookingsPage() {
 }
 
 function Th({ children }: { children: React.ReactNode }) {
-  return <th className="p-2 text-left font-bold">{children}</th>;
+  return <th className="p-2 text-left font-bold text-ink">{children}</th>;
 }
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="p-2">{children}</td>;
+function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <td className={`p-2 text-ink ${className}`}>{children}</td>;
 }

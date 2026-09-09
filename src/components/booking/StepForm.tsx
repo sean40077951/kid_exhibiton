@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Button from "@/components/ui/Button";
 
 type SessionOption = { id: string; timeSlot: string };
 
@@ -29,9 +30,12 @@ export default function StepForm({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
   const [consent, setConsent] = useState(false);
   const [website, setWebsite] = useState(""); // honeypot
   const [error, setError] = useState<string | null>(null);
+
+  const emailInvalid = emailTouched && email.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,24 +53,25 @@ export default function StepForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <button type="button" onClick={onBack} className="text-sm text-brand-primary underline">
+      <button type="button" onClick={onBack} className="text-sm font-bold text-navy underline">
         ‹ 返回上一頁
       </button>
 
-      <div className="rounded-2xl bg-white/70 p-4 text-sm">
+      <div className="rounded-eight border-[3px] border-ink bg-card p-4 text-sm shadow-hardsm">
         <Row label="日期" value={dateStr} />
         <Row label="場次" value={session.timeSlot} />
         <Row label="人數" value={`${headcount} 人`} />
       </div>
 
-      <div className="space-y-3 rounded-2xl bg-white/70 p-4">
+      <div className="space-y-3">
+        <p className="text-xs font-bold uppercase tracking-wide text-muted">Form 表單欄位</p>
         <Field label="姓名" required>
           <input
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="請填寫預約人姓名"
-            className="w-full rounded-lg border border-black/10 px-3 py-2"
+            className="h-10 w-full rounded-eight border-2 border-ink bg-card px-3 text-ink placeholder:text-muted focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
           />
         </Field>
         <Field label="聯絡電話" required>
@@ -75,7 +80,7 @@ export default function StepForm({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="09xxxxxxxx"
-            className="w-full rounded-lg border border-black/10 px-3 py-2"
+            className="h-10 w-full rounded-eight border-2 border-ink bg-card px-3 text-ink placeholder:text-muted focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
           />
         </Field>
         <Field label="電子信箱" required>
@@ -84,9 +89,20 @@ export default function StepForm({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => setEmailTouched(true)}
             placeholder="confirm@example.com"
-            className="w-full rounded-lg border border-black/10 px-3 py-2"
+            className={`h-10 w-full rounded-eight border-2 bg-card px-3 text-ink placeholder:text-muted focus:outline-none ${
+              emailInvalid
+                ? "border-red focus:border-[3px] focus:ring-2 focus:ring-red/30"
+                : "border-ink focus:border-[3px] focus:border-navy focus:ring-2 focus:ring-navy/30"
+            }`}
           />
+          {emailInvalid && (
+            <p className="mt-1 text-xs font-bold text-red">
+              信箱格式不正確，請再確認一次。
+              <span className="block font-normal text-muted">確認信會寄到這個信箱，請仔細確認。</span>
+            </p>
+          )}
         </Field>
 
         {/* Honeypot：CSS 隱藏而非 display:none，一般使用者看不到也不會填 */}
@@ -98,42 +114,51 @@ export default function StepForm({
         </div>
       </div>
 
-      <div className="rounded-2xl border-2 border-brand-danger/60 bg-brand-danger/10 p-4 text-sm">
-        <p className="font-bold text-brand-danger">送出後不能取消或修改</p>
-        <p className="mt-1 opacity-90">系統不提供取消與更改功能，請確認日期、場次與人數無誤再送出。</p>
-        <p className="mt-1 opacity-90">小提醒：記得在預約時間前 10 分鐘到場報到，逾時不候喔！</p>
+      <div className="rounded-blob border-[3px] border-ink bg-red p-4 text-sm text-white shadow-hardsm">
+        <p className="font-display font-bold">送出後不能取消或修改</p>
+        <p className="mt-1 opacity-95">系統不提供取消與更改功能，請確認日期、場次與人數無誤再送出。</p>
+        <p className="mt-1 opacity-95">小提醒：記得在預約時間前 10 分鐘到場報到，逾時不候喔！</p>
       </div>
 
       {consentText && (
-        <div className="rounded-2xl bg-white/70 p-3 text-xs leading-relaxed opacity-80">{consentText}</div>
+        <div className="rounded-eight border-2 border-line bg-card p-3 text-xs leading-relaxed text-muted">
+          {consentText}
+        </div>
       )}
 
-      <label className="flex items-start gap-2 text-xs opacity-90">
-        <input
-          type="checkbox"
-          checked={consent}
-          onChange={(e) => setConsent(e.target.checked)}
-          className="mt-0.5"
-        />
+      <label className="flex items-start gap-2 text-xs text-ink">
+        <span
+          onClick={() => setConsent((v) => !v)}
+          className={`mt-0.5 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-eight border-2 border-ink ${
+            consent ? "bg-green" : "bg-card"
+          }`}
+        >
+          {consent && (
+            <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" aria-hidden="true">
+              <path d="M3 8l3 3 7-7" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </span>
+        <input type="checkbox" checked={consent} onChange={() => {}} className="sr-only" />
         <span>我已閱讀入場注意事項，同意主辦單位為本次預約蒐集與使用上述個人資料。</span>
       </label>
 
       {/* Cloudflare Turnstile 掛載點：正式環境設定 NEXT_PUBLIC_TURNSTILE_SITE_KEY 後於此渲染 widget */}
 
-      {error && <p className="text-sm font-bold text-brand-danger">{error}</p>}
+      {error && <p className="text-sm font-bold text-red">{error}</p>}
 
-      <button type="submit" className="w-full rounded-xl bg-brand-primary py-3 font-bold text-white">
+      <Button type="submit" variant="continue">
         下一步：確認資料
-      </button>
+      </Button>
     </form>
   );
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between border-b border-black/5 py-1 last:border-0">
-      <span className="opacity-60">{label}</span>
-      <span className="font-bold">{value}</span>
+    <div className="flex justify-between border-b border-line py-1 last:border-0">
+      <span className="text-muted">{label}</span>
+      <span className="font-display font-bold text-ink">{value}</span>
     </div>
   );
 }
@@ -141,9 +166,9 @@ function Row({ label, value }: { label: string; value: string }) {
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 block font-bold">
+      <span className="mb-1 block font-bold text-ink">
         {label}
-        {required && <span className="text-brand-danger"> *</span>}
+        {required && <span className="text-red"> *</span>}
       </span>
       {children}
     </label>

@@ -89,26 +89,26 @@ export default function AdminSessionsPage() {
 
   return (
     <main className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-4 text-xl font-bold">名額管理</h1>
+      <h1 className="mb-4 font-display text-xl font-bold text-ink">名額管理</h1>
 
       <div className="mb-4 flex items-center gap-3">
-        <label className="text-sm">
+        <label className="text-sm font-bold text-ink">
           日期
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="ml-2 rounded border border-black/20 px-2 py-1"
+            className="ml-2 rounded-eight border-2 border-ink bg-card px-2 py-1 font-normal"
           />
         </label>
-        {loading && <span className="text-sm opacity-60">載入中…</span>}
+        {loading && <span className="text-sm text-muted">載入中…</span>}
       </div>
 
-      {error && <p className="mb-3 text-sm font-bold text-red-600">{error}</p>}
+      {error && <p className="mb-3 text-sm font-bold text-red">{error}</p>}
 
-      <div className="overflow-x-auto rounded-lg border border-black/10">
+      <div className="overflow-x-auto rounded-eight border-[3px] border-ink bg-card shadow-hardsm">
         <table className="w-full text-sm">
-          <thead className="bg-black/5">
+          <thead className="bg-line/40">
             <tr>
               <Th>場次</Th>
               <Th>人數上限</Th>
@@ -120,15 +120,15 @@ export default function AdminSessionsPage() {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="border-t border-black/5">
-                <Td>{r.timeSlot}</Td>
+              <tr key={r.id} className="border-t border-line">
+                <Td className="font-display font-bold">{r.timeSlot}</Td>
                 <Td>
                   <input
                     type="number"
                     min={0}
                     value={drafts[r.id] ?? ""}
                     onChange={(e) => setDrafts((prev) => ({ ...prev, [r.id]: e.target.value }))}
-                    className="w-20 rounded border border-black/20 px-2 py-1"
+                    className="w-20 rounded-eight border-2 border-ink bg-card px-2 py-1"
                   />
                 </Td>
                 <Td>{r.booked}</Td>
@@ -140,6 +140,7 @@ export default function AdminSessionsPage() {
                       checked={r.isOpen}
                       onChange={(e) => toggleOpen(r.id, e.target.checked)}
                       disabled={savingId === r.id}
+                      className="h-4 w-4 accent-green"
                     />
                     {r.isOpen ? "開放中" : "已關閉"}
                   </label>
@@ -149,7 +150,7 @@ export default function AdminSessionsPage() {
                     type="button"
                     onClick={() => saveCapacity(r.id)}
                     disabled={savingId === r.id || drafts[r.id] === String(r.capacity)}
-                    className="rounded border border-black/20 px-3 py-1 hover:bg-black/5 disabled:opacity-40"
+                    className="rounded-eight border-2 border-ink px-3 py-1 font-bold hover:bg-line/40 disabled:opacity-40"
                   >
                     {savingId === r.id ? "儲存中…" : "儲存上限"}
                   </button>
@@ -158,7 +159,7 @@ export default function AdminSessionsPage() {
             ))}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-4 text-center opacity-60">
+                <td colSpan={6} className="p-4 text-center text-muted">
                   此日期沒有場次資料
                 </td>
               </tr>
@@ -167,7 +168,7 @@ export default function AdminSessionsPage() {
         </table>
       </div>
 
-      <p className="mt-3 text-xs opacity-60">
+      <p className="mt-3 text-xs text-muted">
         把人數上限調到低於「已預約」人數時，不會影響已經成立的預約，只會擋住後續超過已預約人數的新預約。
       </p>
     </main>
@@ -175,8 +176,8 @@ export default function AdminSessionsPage() {
 }
 
 function Th({ children }: { children?: React.ReactNode }) {
-  return <th className="p-2 text-left font-bold">{children}</th>;
+  return <th className="p-2 text-left font-bold text-ink">{children}</th>;
 }
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="p-2">{children}</td>;
+function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <td className={`p-2 text-ink ${className}`}>{children}</td>;
 }
