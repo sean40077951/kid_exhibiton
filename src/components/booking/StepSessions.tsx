@@ -44,9 +44,17 @@ export default function StepSessions({
         ‹ 返回上一頁
       </button>
 
-      <div className="rounded-eight border-[3px] border-ink bg-card p-4 shadow-hardsm">
-        <p className="text-sm text-muted">預約日期</p>
-        <p className="font-display text-lg font-bold text-ink">{dateStr}</p>
+      <div className="flex items-center gap-3 rounded-toy border-[3px] border-ink bg-yellow p-4 shadow-hardsm">
+        <img
+          src="/monsters/monster-05.png"
+          alt=""
+          aria-hidden="true"
+          className="h-11 w-11 shrink-0 rounded-eight border-2 border-dashed border-ink/50 bg-card/40 object-contain p-0.5"
+        />
+        <div>
+          <p className="text-sm text-ink/70">預約日期</p>
+          <p className="font-display text-lg font-bold text-ink">{dateStr}</p>
+        </div>
       </div>
 
       <div className="space-y-3">

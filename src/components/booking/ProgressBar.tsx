@@ -6,6 +6,9 @@ const STEPS = ["選日期", "場次人數", "填資料", "完成"];
 export default function ProgressBar({ current }: { current: number }) {
   return (
     <ol className="w-full">
+      <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted">
+        <span className="text-ink">STEP {current}</span> 進行中
+      </p>
       <div className="grid grid-cols-4 gap-1.5">
         {STEPS.map((_, idx) => {
           const step = idx + 1;
