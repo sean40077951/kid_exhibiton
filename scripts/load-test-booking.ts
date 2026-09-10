@@ -11,6 +11,7 @@
 //   npx tsx scripts/load-test-booking.ts http://localhost:3000 200
 
 import { PrismaClient } from "@prisma/client";
+import { formatDate, isPastBookingCutoff } from "../src/lib/timezone";
 
 // tsx 不會自動載入 .env（跟 prisma/seed.ts 原本遇到的問題一樣），這裡直接用 Node 內建的
 // loadEnvFile 讀取，這樣不管用什麼指令跑這支腳本，DATABASE_URL 都吃得到。
@@ -33,13 +34,17 @@ function percentile(sorted: number[], p: number): number {
 async function main() {
   // 找一個「還沒開始」的未來場次來測，並先把它重設成乾淨的滿額狀態，
   // 這樣測完可以直接用「剩餘名額」反推「應該成功幾筆」，數學算得動。
-  const session = await prisma.session.findFirst({
+  // 一定要排除已經過了 15 分鐘截止時間的場次，不然全部請求會在進到搶名額
+  // 的邏輯之前就被 PAST_CUTOFF 擋掉，測不到真正的併發搶名額情境。
+  const candidates = await prisma.session.findMany({
     where: { isOpen: true },
-    orderBy: { date: "asc" }
+    orderBy: { date: "asc" },
+    take: 50
   });
+  const session = candidates.find((s) => !isPastBookingCutoff(s.date, s.timeSlot));
 
   if (!session) {
-    console.error("找不到任何場次，請先執行 npm run prisma:seed。");
+    console.error("找不到任何還沒過截止時間的場次，請先執行 npm run prisma:seed 或確認場次日期。");
     process.exit(1);
   }
 
@@ -52,7 +57,7 @@ async function main() {
   await prisma.booking.deleteMany({ where: { sessionId: session.id } });
 
   console.log(
-    `目標場次：${session.date.toISOString().slice(0, 10)} ${session.timeSlot}（上限 ${session.capacity} 人，目前已重設為滿額）`
+    `目標場次：${formatDate(session.date, "yyyy-MM-dd")} ${session.timeSlot}（上限 ${session.capacity} 人，目前已重設為滿額）`
   );
   console.log(`併發送出 ${concurrency} 筆請求，每筆預約 1 人...\n`);
 

@@ -34,11 +34,18 @@ export default function StepConfirm({
   onDone: (result: BookingResult) => void;
 }) {
   const [submitting, setSubmitting] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [modalMessage, setModalMessage] = useState<string | null>(null);
+
+  // 壓測結果顯示，人潮尖峰時搶同一場次可能要等到十幾秒才有回應（見壓測紀錄）。
+  // 大多數情況幾秒內就會有結果，太早顯示「系統忙碌」反而會讓使用者誤會平常也很慢，
+  // 所以延遲 3 秒後、還在等待中才顯示，避免誤導。
+  const BUSY_NOTICE_DELAY_MS = 3000;
 
   async function handleConfirm() {
     setSubmitting(true);
     setModalMessage(null);
+    const busyTimer = setTimeout(() => setBusy(true), BUSY_NOTICE_DELAY_MS);
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
@@ -62,6 +69,8 @@ export default function StepConfirm({
     } catch {
       setModalMessage("網路異常，請稍後再試一次");
     } finally {
+      clearTimeout(busyTimer);
+      setBusy(false);
       setSubmitting(false);
     }
   }
@@ -86,6 +95,12 @@ export default function StepConfirm({
         <p className="font-display font-bold">確定資料都正確嗎？</p>
         <p className="mt-1 opacity-95">送出後系統不提供取消或修改，如有問題可至展場詢問現場人員。</p>
       </div>
+
+      {busy && (
+        <div className="rounded-eight border-2 border-ink bg-yellow p-3 text-sm font-bold text-ink shadow-hardsm">
+          目前系統使用量較高，正在為您處理，請耐心等候，不要重新整理或離開頁面喔！
+        </div>
+      )}
 
       <Button type="button" variant="submit" onClick={handleConfirm} disabled={submitting}>
         {submitting ? "送出中…" : "已確認資料無誤，送出預約"}
