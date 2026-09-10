@@ -8,6 +8,7 @@ const TABS = [
   { href: "/admin/bookings", label: "預約查詢" },
   { href: "/admin/sessions", label: "場次管理" },
   { href: "/admin/export", label: "資料匯出" },
+  { href: "/admin/backups", label: "資料備份" },
   { href: "/admin/settings", label: "活動設定" }
 ];
 

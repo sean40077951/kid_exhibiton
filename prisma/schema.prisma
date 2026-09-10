@@ -109,6 +109,19 @@ model Admin {
   createdAt DateTime @default(now())
 }
 
+// 每日自動備份快照，存在同一個資料庫裡（不用另外花錢買 Zeabur 的自動備份方案）。
+// 存 Event/SessionTemplate/Session/Booking 這幾張真正的營運資料表當下的完整內容；
+// 不含 Admin——帳密如果出問題可以直接用環境變數 ADMIN_EMAIL/ADMIN_PASSWORD 重新 seed，
+// 不需要備份救回來。
+model SystemBackup {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  data      Json
+  rowCounts Json // 列表頁要顯示筆數方便瀏覽，不用每次都把整包 data 抓出來算
+
+  @@index([createdAt])
+}
+
 // 資料匯出紀錄（PROJECT_SPEC.md 第 7 節：「建議記錄誰於何時匯出」）
 model AdminExportLog {
   id          String   @id @default(cuid())
