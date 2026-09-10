@@ -16,16 +16,26 @@ export default function StepSessions({
 }) {
   const [sessions, setSessions] = useState<SessionOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [headcount, setHeadcount] = useState<number | null>(null);
 
+  // 人潮尖峰時查詢場次也可能要等好幾秒，超過 3 秒還沒回來才提示「使用人數眾多」，
+  // 平常幾百毫秒就有結果，太早顯示反而會讓使用者誤會平常也很慢（同 StepConfirm 的做法）。
   useEffect(() => {
     setLoading(true);
+    setBusy(false);
     setSelectedId(null);
+    const busyTimer = setTimeout(() => setBusy(true), 3000);
     fetch(`/api/sessions?date=${dateStr}`)
       .then((r) => r.json())
       .then((data) => setSessions(data.sessions ?? []))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearTimeout(busyTimer);
+        setBusy(false);
+        setLoading(false);
+      });
+    return () => clearTimeout(busyTimer);
   }, [dateStr]);
 
   const selected = sessions.find((s) => s.id === selectedId) ?? null;
@@ -59,7 +69,16 @@ export default function StepSessions({
 
       <div className="space-y-3">
         <p className="text-sm font-bold text-ink">場次（每場上限依實際名額）</p>
-        {loading && <p className="text-sm text-muted">載入中…</p>}
+        {loading && (
+          <p className="text-sm text-muted">
+            載入中…
+            {busy && (
+              <span className="mt-1 block font-bold text-ink">
+                目前系統使用人數眾多，資料載入需要幾秒鐘的時間，請耐心等候。
+              </span>
+            )}
+          </p>
+        )}
         {!loading && sessions.length === 0 && <p className="text-sm text-muted">此日期尚無可預約場次。</p>}
         {sessions.map((s) => {
           const full = s.remaining <= 0;

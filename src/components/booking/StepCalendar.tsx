@@ -30,15 +30,25 @@ export default function StepCalendar({
   }));
   const [days, setDays] = useState<Record<string, DayInfo>>({});
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
 
   const monthStr = `${cursor.year}-${String(cursor.month).padStart(2, "0")}`;
 
+  // 人潮尖峰時月曆資料也可能要等好幾秒，超過 3 秒還沒回來才提示「使用人數眾多」，
+  // 平常幾百毫秒就有結果，太早顯示反而會讓使用者誤會平常也很慢（同 StepConfirm 的做法）。
   useEffect(() => {
     setLoading(true);
+    setBusy(false);
+    const busyTimer = setTimeout(() => setBusy(true), 3000);
     fetch(`/api/availability?month=${monthStr}`)
       .then((r) => r.json())
       .then((data) => setDays(data.days ?? {}))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearTimeout(busyTimer);
+        setBusy(false);
+        setLoading(false);
+      });
+    return () => clearTimeout(busyTimer);
   }, [monthStr]);
 
   const firstWeekday = new Date(cursor.year, cursor.month - 1, 1).getDay();
@@ -83,6 +93,12 @@ export default function StepCalendar({
             ›
           </IconButton>
         </div>
+
+        {loading && busy && (
+          <p className="mb-3 rounded-eight border-2 border-ink bg-yellow p-2.5 text-center text-xs font-bold text-ink shadow-hardsm">
+            目前系統使用人數眾多，資料載入需要幾秒鐘的時間，請耐心等候。
+          </p>
+        )}
 
         <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-muted">
           {WEEKDAY_LABELS.map((w) => (
