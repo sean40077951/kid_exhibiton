@@ -105,8 +105,10 @@ export default function StepForm({
           )}
         </Field>
 
-        {/* Honeypot：CSS 隱藏而非 display:none，一般使用者看不到也不會填 */}
-        <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+        {/* Honeypot：sr-only 隱藏而非 display:none，一般使用者看不到也不會填。
+            原本用 -left-[9999px] 做法會讓手機瀏覽器把整個頁面的可捲動範圍撐寬，
+            導致頁面被橫向捲走、內容被裁掉，改用 sr-only（1px 裁切）不會有這個問題。 */}
+        <div className="sr-only" aria-hidden="true">
           <label>
             網站
             <input tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
