@@ -40,17 +40,20 @@ export async function GET(req: NextRequest) {
       })
     : [];
 
-  const byDate = new Map<string, { remaining: number; capacity: number; anyOpen: boolean }>();
+  const byDate = new Map<string, { remaining: number; capacity: number; anyBookable: boolean }>();
   for (const s of sessions) {
-    // 場次開始前 15 分鐘自動停止預約（4-2），這種場次不該再算進「可預約」的加總裡。
-    if (isPastBookingCutoff(s.date, s.timeSlot)) continue;
+    if (!s.isOpen) continue;
 
     const key = formatDate(s.date, "yyyy-MM-dd");
-    const agg = byDate.get(key) ?? { remaining: 0, capacity: 0, anyOpen: false };
-    if (s.isOpen) {
+    const agg = byDate.get(key) ?? { remaining: 0, capacity: 0, anyBookable: false };
+
+    // 場次開始前 15 分鐘自動停止預約（4-2）。這種場次不算進「可預約」的加總，
+    // 但這天本身不算「額滿」——額滿是指名額被訂光，不是時間過了訂不到，
+    // 兩者對使用者的意義不一樣，不能用同一個標籤。
+    if (!isPastBookingCutoff(s.date, s.timeSlot)) {
       agg.remaining += s.remaining;
       agg.capacity += s.capacity;
-      agg.anyOpen = true;
+      agg.anyBookable = true;
     }
     byDate.set(key, agg);
   }
@@ -74,7 +77,13 @@ export async function GET(req: NextRequest) {
     }
 
     const agg = byDate.get(dateStr);
-    if (!agg || !agg.anyOpen || agg.remaining <= 0) {
+    // 沒有場次資料，或今天所有場次都已經過了「開始前 15 分鐘」的截止點
+    // （例如已經是傍晚，今天場次全數截止）——這種情況顯示未開放，不是額滿。
+    if (!agg || !agg.anyBookable) {
+      days[dateStr] = { status: "closed" };
+      continue;
+    }
+    if (agg.remaining <= 0) {
       days[dateStr] = { status: "full", remaining: 0 };
       continue;
     }
