@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -66,6 +67,30 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "找不到此場次" }, { status: 404 });
     }
     console.error("[admin/sessions] 更新失敗", e);
+    return NextResponse.json({ error: "系統忙碌中，請稍後再試一次" }, { status: 500 });
+  }
+}
+
+// 刪除場次。已經有人預約的場次不能刪，這種情況要請管理者改用「關閉」而不是刪除，
+// 避免真的把已成立的預約資料弄不見。先主動查一次有沒有預約再刪，比較明確、不用
+// 去猜資料庫外鍵錯誤會被 Prisma 包成哪種例外（不同情況實測發現不一定是 P2003）。
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const bookingCount = await prisma.booking.count({ where: { sessionId: params.id } });
+    if (bookingCount > 0) {
+      return NextResponse.json(
+        { error: "這個場次已經有人預約，無法刪除，請改用「關閉」讓它停止接受新預約" },
+        { status: 409 }
+      );
+    }
+
+    await prisma.session.delete({ where: { id: params.id } });
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
+      return NextResponse.json({ error: "找不到此場次" }, { status: 404 });
+    }
+    console.error("[admin/sessions] 刪除失敗", e);
     return NextResponse.json({ error: "系統忙碌中，請稍後再試一次" }, { status: 500 });
   }
 }

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { dateStringToUtcMidnight } from "@/lib/timezone";
 
@@ -37,4 +39,51 @@ export async function GET(req: NextRequest) {
       isOpen: s.isOpen
     }))
   });
+}
+
+const createBodySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日期格式錯誤，需為 yyyy-mm-dd"),
+  timeSlot: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "時段格式錯誤，需為 HH:mm（例如 14:30）"),
+  capacity: z.number().int().min(0, "人數上限需為 0 以上的整數")
+});
+
+// 後台新增場次（場次管理頁，除了開關、調上限，也要能直接新增一個時段）。
+export async function POST(req: NextRequest) {
+  const json = await req.json().catch(() => null);
+  const parsed = createBodySchema.safeParse(json);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "資料格式錯誤" }, { status: 400 });
+  }
+
+  const event = await prisma.event.findFirst({ orderBy: { createdAt: "asc" } });
+  if (!event) {
+    return NextResponse.json({ error: "尚未設定展會" }, { status: 404 });
+  }
+
+  try {
+    const session = await prisma.session.create({
+      data: {
+        eventId: event.id,
+        date: dateStringToUtcMidnight(parsed.data.date),
+        timeSlot: parsed.data.timeSlot,
+        capacity: parsed.data.capacity,
+        remaining: parsed.data.capacity,
+        isOpen: true
+      }
+    });
+    return NextResponse.json({
+      id: session.id,
+      timeSlot: session.timeSlot,
+      capacity: session.capacity,
+      remaining: session.remaining,
+      booked: 0,
+      isOpen: session.isOpen
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      return NextResponse.json({ error: "這個日期已經有同樣時段的場次了" }, { status: 409 });
+    }
+    console.error("[admin/sessions] 新增場次失敗", e);
+    return NextResponse.json({ error: "系統忙碌中，請稍後再試一次" }, { status: 500 });
+  }
 }
