@@ -1,20 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import type { PhaseOpenRule } from "@/lib/phase-rules";
 
 export const dynamic = "force-dynamic";
 
-// 布告欄文字後台可自行編輯（業主須知回覆 4-3）。
+// 布告欄文字（業主須知回覆 4-3）與分階段開放日期，後台皆可自行編輯，
+// 不用再麻煩工程師手動改資料庫（業主要求更有彈性，不要寫死在種子資料裡）。
 export async function GET() {
   const event = await prisma.event.findFirst({ orderBy: { createdAt: "asc" } });
   if (!event) {
     return NextResponse.json({ error: "尚未設定展會" }, { status: 404 });
   }
-  return NextResponse.json({ id: event.id, bannerText: event.bannerText });
+  return NextResponse.json({
+    id: event.id,
+    bannerText: event.bannerText,
+    phaseOpenRules: event.phaseOpenRules as PhaseOpenRule[]
+  });
 }
 
 const bodySchema = z.object({
-  bannerText: z.string().max(500, "布告欄文字太長，請控制在 500 字以內")
+  bannerText: z.string().max(500, "布告欄文字太長，請控制在 500 字以內"),
+  phaseOpenRules: z
+    .array(
+      z.object({
+        openDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "開放日期格式錯誤，需為 yyyy-mm-dd"),
+        appliesToMonth: z.string().regex(/^\d{4}-\d{2}$/, "對應月份格式錯誤，需為 yyyy-mm")
+      })
+    )
+    .min(1, "至少要設定一筆分階段開放規則")
 });
 
 export async function PATCH(req: NextRequest) {
@@ -24,6 +38,11 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "資料格式錯誤" }, { status: 400 });
   }
 
+  const months = parsed.data.phaseOpenRules.map((r) => r.appliesToMonth);
+  if (new Set(months).size !== months.length) {
+    return NextResponse.json({ error: "同一個月份不能設定兩筆開放規則" }, { status: 400 });
+  }
+
   const event = await prisma.event.findFirst({ orderBy: { createdAt: "asc" } });
   if (!event) {
     return NextResponse.json({ error: "尚未設定展會" }, { status: 404 });
@@ -31,8 +50,12 @@ export async function PATCH(req: NextRequest) {
 
   const updated = await prisma.event.update({
     where: { id: event.id },
-    data: { bannerText: parsed.data.bannerText }
+    data: { bannerText: parsed.data.bannerText, phaseOpenRules: parsed.data.phaseOpenRules }
   });
 
-  return NextResponse.json({ id: updated.id, bannerText: updated.bannerText });
+  return NextResponse.json({
+    id: updated.id,
+    bannerText: updated.bannerText,
+    phaseOpenRules: updated.phaseOpenRules as PhaseOpenRule[]
+  });
 }
