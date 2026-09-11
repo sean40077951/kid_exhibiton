@@ -17,7 +17,7 @@ export default function StepSuccess({
       <div className="rounded-blob border-[3px] border-ink bg-green p-6 text-center text-white shadow-hardlg">
         <img src="/monsters/monster-02.png" alt="" aria-hidden="true" className="mx-auto mb-3 h-20 w-20" />
         <p className="font-display text-2xl font-bold">預約成功！</p>
-        <p className="mt-2 text-sm opacity-95">確認信件怪獸已經送到你的信箱，沒收到的話可以看看垃圾信件匣呦！
+        <p className="mt-2 text-sm opacity-95">確認信件怪獸已經送到你的信箱，沒收到的話可以看看垃圾信件匣呦！怪獸小提醒；請截圖保存此頁呦!
 </p>
       </div>
 
