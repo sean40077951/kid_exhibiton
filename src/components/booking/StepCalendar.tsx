@@ -86,8 +86,15 @@ export default function StepCalendar({
           <IconButton onClick={() => changeMonth(-1)} label="上個月">
             ‹
           </IconButton>
-          <h2 className="font-display text-lg font-bold text-ink">
+          <h2 className="flex items-center gap-2 font-display text-lg font-bold text-ink">
             {cursor.year} 年 {cursor.month} 月
+            {loading && (
+              <span
+                className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-ink border-t-transparent"
+                role="status"
+                aria-label="載入中"
+              />
+            )}
           </h2>
           <IconButton onClick={() => changeMonth(1)} label="下個月">
             ›

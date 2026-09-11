@@ -70,14 +70,21 @@ export default function StepSessions({
       <div className="space-y-3">
         <p className="text-sm font-bold text-ink">場次（每場上限依實際名額）</p>
         {loading && (
-          <p className="text-sm text-muted">
-            載入中…
+          <div className="space-y-1 text-sm text-muted">
+            <p className="flex items-center gap-2">
+              <span
+                className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2 border-muted border-t-transparent"
+                role="status"
+                aria-label="載入中"
+              />
+              載入中…
+            </p>
             {busy && (
-              <span className="mt-1 block font-bold text-ink">
+              <p className="font-bold text-ink">
                 目前系統使用人數眾多，資料載入需要幾秒鐘的時間，請耐心等候。
-              </span>
+              </p>
             )}
-          </p>
+          </div>
         )}
         {!loading && sessions.length === 0 && <p className="text-sm text-muted">此日期尚無可預約場次。</p>}
         {sessions.map((s) => {
