@@ -36,15 +36,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-paper">
       <header className="border-b-[3px] border-ink bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <nav className="flex gap-2">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6">
+          <nav className="flex w-full min-w-0 gap-2 overflow-x-auto pb-1 sm:w-auto sm:pb-0">
             {TABS.map((tab) => {
               const active = pathname === tab.href;
               return (
                 <Link
                   key={tab.href}
                   href={tab.href}
-                  className={`rounded-eight border-2 px-3 py-1.5 text-sm font-bold transition ${
+                  className={`shrink-0 whitespace-nowrap rounded-eight border-2 px-3 py-1.5 text-sm font-bold transition ${
                     active ? "border-ink bg-navy text-white" : "border-transparent text-ink hover:bg-line/40"
                   }`}
                 >
@@ -57,7 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            className="rounded-eight border-2 border-ink px-3 py-1.5 text-sm font-bold text-ink hover:bg-line/40 disabled:opacity-40"
+            className="shrink-0 rounded-eight border-2 border-ink px-3 py-1.5 text-sm font-bold text-ink hover:bg-line/40 disabled:opacity-40"
           >
             {loggingOut ? "登出中…" : "登出"}
           </button>
