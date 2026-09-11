@@ -14,6 +14,7 @@ export default function AdminBackupsPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   function load() {
     setLoading(true);
@@ -38,6 +39,23 @@ export default function AdminBackupsPage() {
       load();
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function deleteBackup(id: string) {
+    if (!window.confirm("確定要刪除這筆備份紀錄嗎？刪除後無法復原（只是刪這筆備份，不會動到正式資料）。")) return;
+    setDeletingId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/backups/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "刪除失敗");
+        return;
+      }
+      setBackups((prev) => prev.filter((b) => b.id !== id));
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -68,6 +86,7 @@ export default function AdminBackupsPage() {
               <Th>場次</Th>
               <Th>預約</Th>
               <Th />
+              <Th />
             </tr>
           </thead>
           <tbody>
@@ -94,11 +113,21 @@ export default function AdminBackupsPage() {
                       下載
                     </a>
                   </Td>
+                  <Td>
+                    <button
+                      type="button"
+                      onClick={() => deleteBackup(b.id)}
+                      disabled={deletingId === b.id}
+                      className="rounded-eight border-2 border-red px-3 py-1 font-bold text-red hover:bg-red/10 disabled:opacity-40"
+                    >
+                      {deletingId === b.id ? "刪除中…" : "刪除"}
+                    </button>
+                  </Td>
                 </tr>
               ))}
             {!loading && backups.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-4 text-center text-muted">
+                <td colSpan={7} className="p-4 text-center text-muted">
                   還沒有任何備份紀錄
                 </td>
               </tr>
