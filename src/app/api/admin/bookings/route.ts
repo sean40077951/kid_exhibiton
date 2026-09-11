@@ -8,11 +8,13 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const dateStr = req.nextUrl.searchParams.get("date");
   const timeSlot = req.nextUrl.searchParams.get("timeSlot");
+  const code = req.nextUrl.searchParams.get("code");
 
   const bookings = await prisma.booking.findMany({
     where: {
       ...(dateStr ? { bookingDate: dateStringToUtcMidnight(dateStr) } : {}),
-      ...(timeSlot ? { session: { timeSlot } } : {})
+      ...(timeSlot ? { session: { timeSlot } } : {}),
+      ...(code ? { bookingCode: { contains: code, mode: "insensitive" } } : {})
     },
     include: { session: { select: { timeSlot: true } } },
     orderBy: { createdAt: "desc" },

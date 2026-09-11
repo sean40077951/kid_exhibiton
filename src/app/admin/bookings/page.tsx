@@ -21,26 +21,45 @@ const TIME_SLOTS = ["10:00", "10:35", "11:10", "11:45", "13:30", "14:05", "14:40
 export default function AdminBookingsPage() {
   const [date, setDate] = useState("");
   const [timeSlot, setTimeSlot] = useState("");
+  const [codeInput, setCodeInput] = useState("");
+  const [code, setCode] = useState("");
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // 打字時不要每個字都馬上打 API，停下來 400ms 後才真的送出查詢。
+  useEffect(() => {
+    const t = setTimeout(() => setCode(codeInput.trim()), 400);
+    return () => clearTimeout(t);
+  }, [codeInput]);
 
   useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (date) params.set("date", date);
     if (timeSlot) params.set("timeSlot", timeSlot);
+    if (code) params.set("code", code);
     const qs = params.toString() ? `?${params.toString()}` : "";
     fetch(`/api/admin/bookings${qs}`)
       .then((r) => r.json())
       .then((data) => setRows(data.bookings ?? []))
       .finally(() => setLoading(false));
-  }, [date, timeSlot]);
+  }, [date, timeSlot, code]);
 
   return (
     <main className="mx-auto max-w-5xl p-6">
       <h1 className="mb-4 font-display text-xl font-bold text-ink">預約查詢</h1>
 
-      <div className="mb-4 flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <label className="text-sm font-bold text-ink">
+          預約編號
+          <input
+            type="text"
+            placeholder="例如 M260912-2947"
+            value={codeInput}
+            onChange={(e) => setCodeInput(e.target.value)}
+            className="ml-2 rounded-eight border-2 border-ink bg-card px-2 py-1 font-normal"
+          />
+        </label>
         <label className="text-sm font-bold text-ink">
           日期
           <input
