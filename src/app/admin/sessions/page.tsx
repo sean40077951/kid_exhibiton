@@ -179,58 +179,64 @@ export default function AdminSessionsPage() {
           />
         </label>
         {loading && <span className="text-sm text-muted">載入中…</span>}
-
-        <span className="mx-1 h-5 w-px bg-line" />
-
-        <span className="text-sm font-bold text-ink">整天：</span>
-        <button
-          type="button"
-          onClick={() => bulkSetOpen(true)}
-          disabled={bulkSaving || loading || rows.length === 0}
-          className="rounded-eight border-2 border-ink bg-green px-3 py-1 text-sm font-bold text-white disabled:opacity-40"
-        >
-          {bulkSaving ? "處理中…" : "整天開放"}
-        </button>
-        <button
-          type="button"
-          onClick={() => bulkSetOpen(false)}
-          disabled={bulkSaving || loading || rows.length === 0}
-          className="rounded-eight border-2 border-ink bg-red px-3 py-1 text-sm font-bold text-white disabled:opacity-40"
-        >
-          {bulkSaving ? "處理中…" : "整天關閉"}
-        </button>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-end gap-3 rounded-eight border-2 border-dashed border-line p-3">
-        <span className="text-sm font-bold text-ink">新增場次：</span>
-        <label className="text-xs text-muted">
-          時段（HH:mm）
-          <input
-            type="text"
-            placeholder="14:30"
-            value={newTimeSlot}
-            onChange={(e) => setNewTimeSlot(e.target.value)}
-            className="mt-1 block w-24 rounded-eight border-2 border-ink bg-card px-2 py-1 text-sm text-ink"
-          />
-        </label>
-        <label className="text-xs text-muted">
-          人數上限
-          <input
-            type="number"
-            min={0}
-            value={newCapacity}
-            onChange={(e) => setNewCapacity(e.target.value)}
-            className="mt-1 block w-20 rounded-eight border-2 border-ink bg-card px-2 py-1 text-sm text-ink"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={createSession}
-          disabled={creating || !newTimeSlot}
-          className="rounded-eight border-2 border-ink bg-navy px-3 py-1.5 text-sm font-bold text-white disabled:opacity-40"
-        >
-          {creating ? "新增中…" : "＋ 新增"}
-        </button>
+      <div className="mb-4 rounded-eight border-2 border-dashed border-line p-3">
+        <span className="mb-2 block text-sm font-bold text-ink">整天：</span>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <button
+            type="button"
+            onClick={() => bulkSetOpen(true)}
+            disabled={bulkSaving || loading || rows.length === 0}
+            className="rounded-eight border-2 border-ink bg-green px-3 py-1.5 text-sm font-bold text-white disabled:opacity-40"
+          >
+            {bulkSaving ? "處理中…" : "整天開放"}
+          </button>
+          <button
+            type="button"
+            onClick={() => bulkSetOpen(false)}
+            disabled={bulkSaving || loading || rows.length === 0}
+            className="rounded-eight border-2 border-ink bg-red px-3 py-1.5 text-sm font-bold text-white disabled:opacity-40"
+          >
+            {bulkSaving ? "處理中…" : "整天關閉"}
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-4 rounded-eight border-2 border-dashed border-line p-3">
+        <span className="mb-2 block text-sm font-bold text-ink">新增場次：</span>
+        <div className="flex flex-wrap gap-3">
+          <label className="text-xs text-muted">
+            時段（HH:mm）
+            <input
+              type="text"
+              placeholder="14:30"
+              value={newTimeSlot}
+              onChange={(e) => setNewTimeSlot(e.target.value)}
+              className="mt-1 block w-24 rounded-eight border-2 border-ink bg-card px-2 py-1 text-sm text-ink"
+            />
+          </label>
+          <label className="text-xs text-muted">
+            人數上限
+            <input
+              type="number"
+              min={0}
+              value={newCapacity}
+              onChange={(e) => setNewCapacity(e.target.value)}
+              className="mt-1 block w-20 rounded-eight border-2 border-ink bg-card px-2 py-1 text-sm text-ink"
+            />
+          </label>
+        </div>
+        <div className="mt-3 flex justify-end">
+          <button
+            type="button"
+            onClick={createSession}
+            disabled={creating || !newTimeSlot}
+            className="rounded-eight border-2 border-ink bg-navy px-3 py-1.5 text-sm font-bold text-white disabled:opacity-40"
+          >
+            {creating ? "新增中…" : "＋ 新增"}
+          </button>
+        </div>
       </div>
 
       {error && <p className="mb-3 text-sm font-bold text-red">{error}</p>}
@@ -317,8 +323,8 @@ export default function AdminSessionsPage() {
 }
 
 function Th({ children }: { children?: React.ReactNode }) {
-  return <th className="p-2 text-left font-bold text-ink">{children}</th>;
+  return <th className="whitespace-nowrap p-2 text-left font-bold text-ink">{children}</th>;
 }
 function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <td className={`p-2 text-ink ${className}`}>{children}</td>;
+  return <td className={`whitespace-nowrap p-2 text-ink ${className}`}>{children}</td>;
 }

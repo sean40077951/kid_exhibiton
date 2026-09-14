@@ -140,8 +140,8 @@ export default function AdminBackupsPage() {
 }
 
 function Th({ children }: { children?: React.ReactNode }) {
-  return <th className="p-2 text-left font-bold text-ink">{children}</th>;
+  return <th className="whitespace-nowrap p-2 text-left font-bold text-ink">{children}</th>;
 }
 function Td({ children }: { children: React.ReactNode }) {
-  return <td className="p-2 text-ink">{children}</td>;
+  return <td className="whitespace-nowrap p-2 text-ink">{children}</td>;
 }

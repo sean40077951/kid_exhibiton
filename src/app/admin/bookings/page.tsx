@@ -57,7 +57,7 @@ export default function AdminBookingsPage() {
             placeholder="例如 M260912-2947"
             value={codeInput}
             onChange={(e) => setCodeInput(e.target.value)}
-            className="ml-2 rounded-eight border-2 border-ink bg-card px-2 py-1 font-normal"
+            className="ml-2 w-36 rounded-eight border-2 border-ink bg-card px-2 py-1 font-normal"
           />
         </label>
         <label className="text-sm font-bold text-ink">
@@ -142,8 +142,8 @@ export default function AdminBookingsPage() {
 }
 
 function Th({ children }: { children: React.ReactNode }) {
-  return <th className="p-2 text-left font-bold text-ink">{children}</th>;
+  return <th className="whitespace-nowrap p-2 text-left font-bold text-ink">{children}</th>;
 }
 function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <td className={`p-2 text-ink ${className}`}>{children}</td>;
+  return <td className={`whitespace-nowrap p-2 text-ink ${className}`}>{children}</td>;
 }
