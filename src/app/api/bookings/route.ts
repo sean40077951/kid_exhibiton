@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { normalizeEmail, normalizePhone } from "@/lib/normalize";
 import { generateBookingCode } from "@/lib/booking-code";
+import { isBlockedByQrGate } from "@/lib/qr-pass";
 import { sendConfirmationEmail } from "@/lib/mailer";
 import { formatDate, isPastBookingCutoff } from "@/lib/timezone";
 
@@ -64,6 +65,10 @@ async function verifyTurnstile(token: string | undefined, ip: string | null) {
 }
 
 export async function POST(req: NextRequest) {
+  if (await isBlockedByQrGate(req)) {
+    return NextResponse.json({ error: "請重新掃描現場 QR Code 後再登記", code: "QR_REQUIRED" }, { status: 403 });
+  }
+
   const json = await req.json().catch(() => null);
   const parsed = bodySchema.safeParse(json);
   if (!parsed.success) {

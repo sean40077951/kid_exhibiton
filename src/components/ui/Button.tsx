@@ -2,7 +2,7 @@
 
 import { ButtonHTMLAttributes } from "react";
 
-type Variant = "submit" | "continue" | "secondary";
+type Variant = "submit" | "continue" | "secondary" | "pink" | "pink-outline";
 
 const VARIANT_CLASS: Record<Variant, string> = {
   // 送出鍵：主要送出動作（確認送出、已確認資料無誤）
@@ -10,7 +10,17 @@ const VARIANT_CLASS: Record<Variant, string> = {
   // 可繼續：一般的下一步／彈窗確認
   continue: "bg-green text-white",
   // 次要動作：返回、再預約另一天
-  secondary: "bg-paper text-ink"
+  secondary: "bg-paper text-ink",
+  // 「體驗登記系統」新版視覺（業主提供 Figma 參考稿）用的兩種，見下面 FLAT_VARIANTS
+  pink: "",
+  "pink-outline": ""
+};
+
+// 新版設計沒有硬陰影／粗描邊的印刷感，走扁平圓角膠囊，這兩種要跳過舊版 base class。
+const FLAT_VARIANTS: Variant[] = ["pink", "pink-outline"];
+const FLAT_CLASS: Record<"pink" | "pink-outline", string> = {
+  pink: "bg-pink text-white active:bg-pinkdeep disabled:bg-boxgrey disabled:text-muted",
+  "pink-outline": "border-2 border-pink bg-white text-pink active:bg-pink/10 disabled:border-boxgrey disabled:text-muted"
 };
 
 // 按鈕組規範（ui/_preview/01_按鈕組.png）：圓角滿、描邊 3px 墨黑、硬陰影 4,4，
@@ -21,6 +31,18 @@ export default function Button({
   disabled,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
+  if (FLAT_VARIANTS.includes(variant)) {
+    return (
+      <button
+        {...props}
+        disabled={disabled}
+        className={`w-full rounded-full px-6 py-3 text-base font-bold transition-colors duration-150 disabled:cursor-not-allowed ${FLAT_CLASS[variant as "pink" | "pink-outline"]} ${className}`}
+      >
+        {props.children}
+      </button>
+    );
+  }
+
   return (
     <button
       {...props}

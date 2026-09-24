@@ -15,10 +15,10 @@ export default function Modal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/45 p-4">
-      <div className="w-full max-w-sm rounded-blob border-[3px] border-ink bg-card p-6 text-center shadow-hardlg">
-        <p className="font-display text-lg font-bold text-ink">{title}</p>
+      <div className="w-full max-w-sm rounded-[28px] bg-white p-6 text-center shadow-soft">
+        <p className="text-lg font-bold text-ink">{title}</p>
         {description && <p className="mt-2 text-sm text-muted">{description}</p>}
-        <Button variant="continue" onClick={onClose} className="mt-5">
+        <Button variant="pink" onClick={onClose} className="mt-5">
           知道了
         </Button>
       </div>

@@ -21,7 +21,17 @@ const config: Config = {
         orange: "#E8571F", // 加油站
         stone: "#9C9691", // 停用按鈕
         hotred: "#E8231A", // 送出鍵
-        hotyellow: "#FFC81E" // 送出鍵按下
+        hotyellow: "#FFC81E", // 送出鍵按下
+
+        // 「體驗登記系統」視覺（業主提供 Figma 參考稿），只套用在使用者端預約流程，
+        // 後台管理頁維持原本「Monster Play System」風格不動，所以這組是新增、不是取代。
+        pink: "#EC1C8D", // 主色：按鈕／選中狀態
+        pinkdeep: "#C2166F", // 按下／深色狀態
+        skyblue: "#2FA3DE", // 裝飾背景（波浪）
+        olive: "#C6CE49", // 裝飾背景（波浪）
+        cream2: "#F7F1E3", // 卡片底色
+        tagyellow: "#F0C93E", // 標籤／提醒色塊
+        boxgrey: "#EFECE3" // 唯讀欄位（例如日期顯示框）底色
       },
       borderRadius: {
         eight: "8px",
@@ -32,7 +42,9 @@ const config: Config = {
       boxShadow: {
         hardsm: "3px 3px 0 #121212",
         hard: "4px 4px 0 #121212",
-        hardlg: "6px 6px 0 #121212"
+        hardlg: "6px 6px 0 #121212",
+        soft: "0 8px 24px rgba(30,20,10,0.12)",
+        softsm: "0 2px 10px rgba(30,20,10,0.08)"
       },
       fontFamily: {
         sans: ["'Noto Sans TC'", "'Noto Sans TC Ext'", "'PingFang TC'", "'Microsoft JhengHei'", "sans-serif"],

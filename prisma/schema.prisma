@@ -18,11 +18,13 @@ model Event {
   closedWeekday     Int      @default(1) // 週一 = 1（JS getDay() 慣例：日=0...六=6）
   phaseOpenRules    Json     @default("[]") // [{ openDate, appliesToMonth }]
   bannerText        String   @default("")
+  introText         String   @default("") // 展覽介紹描述（業主提供「體驗登記系統」Figma 參考稿左欄文字，含開放時間／地點）
   noticeText        String   @default("")
   emailTemplate     String   @default("")
   consentText       String   @default("")
   consentVersion    String   @default("v1")
   dataRetentionDays Int      @default(365)
+  qrGateEnabled     Boolean  @default(false) // 開啟後前台須掃當天現場 QR Code 才能登記（見 src/lib/qr-pass.ts）
 
   sessionTemplates SessionTemplate[]
   sessions         Session[]

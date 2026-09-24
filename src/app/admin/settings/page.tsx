@@ -7,6 +7,7 @@ type PhaseOpenRule = { openDate: string; appliesToMonth: string };
 
 export default function AdminSettingsPage() {
   const [bannerText, setBannerText] = useState("");
+  const [introText, setIntroText] = useState("");
   const [phaseOpenRules, setPhaseOpenRules] = useState<PhaseOpenRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -18,6 +19,7 @@ export default function AdminSettingsPage() {
       .then((r) => r.json())
       .then((data) => {
         setBannerText(data.bannerText ?? "");
+        setIntroText(data.introText ?? "");
         setPhaseOpenRules(data.phaseOpenRules ?? []);
       })
       .finally(() => setLoading(false));
@@ -43,7 +45,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/event", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bannerText, phaseOpenRules })
+        body: JSON.stringify({ bannerText, introText, phaseOpenRules })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -73,6 +75,24 @@ export default function AdminSettingsPage() {
               onChange={(e) => setBannerText(e.target.value)}
               rows={4}
               maxLength={500}
+              className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
+            />
+          )}
+        </label>
+
+        <label className="block text-sm">
+          <span className="mb-1 block font-bold text-ink">展覽介紹</span>
+          <span className="mb-2 block text-xs text-muted">
+            顯示在前台登記頁面左欄（桌機版）／登記表單上方（手機版），可包含活動簡介、開放時間、地點等內容，換行會保留。
+          </span>
+          {loading ? (
+            <p className="text-sm text-muted">載入中…</p>
+          ) : (
+            <textarea
+              value={introText}
+              onChange={(e) => setIntroText(e.target.value)}
+              rows={8}
+              maxLength={1000}
               className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
             />
           )}

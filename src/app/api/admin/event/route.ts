@@ -15,12 +15,14 @@ export async function GET() {
   return NextResponse.json({
     id: event.id,
     bannerText: event.bannerText,
+    introText: event.introText,
     phaseOpenRules: event.phaseOpenRules as PhaseOpenRule[]
   });
 }
 
 const bodySchema = z.object({
   bannerText: z.string().max(500, "布告欄文字太長，請控制在 500 字以內"),
+  introText: z.string().max(1000, "展覽介紹文字太長，請控制在 1000 字以內"),
   phaseOpenRules: z
     .array(
       z.object({
@@ -50,12 +52,17 @@ export async function PATCH(req: NextRequest) {
 
   const updated = await prisma.event.update({
     where: { id: event.id },
-    data: { bannerText: parsed.data.bannerText, phaseOpenRules: parsed.data.phaseOpenRules }
+    data: {
+      bannerText: parsed.data.bannerText,
+      introText: parsed.data.introText,
+      phaseOpenRules: parsed.data.phaseOpenRules
+    }
   });
 
   return NextResponse.json({
     id: updated.id,
     bannerText: updated.bannerText,
+    introText: updated.introText,
     phaseOpenRules: updated.phaseOpenRules as PhaseOpenRule[]
   });
 }

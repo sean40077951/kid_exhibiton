@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isBlockedByQrGate } from "@/lib/qr-pass";
 import { dateStringToUtcMidnight, isPastBookingCutoff } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
 // Step 2：列出某天的場次與即時剩餘名額。
 export async function GET(req: NextRequest) {
+  if (await isBlockedByQrGate(req)) {
+    return NextResponse.json({ error: "請掃描現場 QR Code 進入登記", code: "QR_REQUIRED" }, { status: 403 });
+  }
+
   const dateStr = req.nextUrl.searchParams.get("date"); // yyyy-MM-dd
   if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     return NextResponse.json({ error: "缺少或格式錯誤的 date 參數（需 yyyy-MM-dd）" }, { status: 400 });
