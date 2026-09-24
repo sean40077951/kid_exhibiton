@@ -6,7 +6,7 @@ import { normalizeEmail, normalizePhone } from "@/lib/normalize";
 import { generateBookingCode } from "@/lib/booking-code";
 import { isBlockedByQrGate } from "@/lib/qr-pass";
 import { sendConfirmationEmail } from "@/lib/mailer";
-import { formatDate, isPastBookingCutoff } from "@/lib/timezone";
+import { formatDate, isPastBookingCutoff, todayDateStringInTaipei } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
@@ -98,6 +98,11 @@ export async function POST(req: NextRequest) {
     }
     if (!session.isOpen) {
       return NextResponse.json({ error: "此場次已關閉，請重新選擇" }, { status: 409 });
+    }
+    // 只能登記「今天」的場次（現場掃 QR Code 登記）。前台只會列出今天的場次，
+    // 但 API 不能只靠前台約束，否則有人直接送別天的 sessionId 就能佔走未來名額。
+    if (formatDate(session.date, "yyyy-MM-dd") !== todayDateStringInTaipei()) {
+      return NextResponse.json({ error: "僅開放當天場次登記，請重新選擇", code: "NOT_TODAY" }, { status: 409 });
     }
     // 場次開始前 15 分鐘自動停止預約（業主須知回覆 4-2），即時計算，不用排程改資料庫。
     if (isPastBookingCutoff(session.date, session.timeSlot)) {

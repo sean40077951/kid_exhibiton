@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isBlockedByQrGate } from "@/lib/qr-pass";
-import { dateStringToUtcMidnight, isPastBookingCutoff } from "@/lib/timezone";
+import { dateStringToUtcMidnight, isPastBookingCutoff, todayDateStringInTaipei } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +14,12 @@ export async function GET(req: NextRequest) {
   const dateStr = req.nextUrl.searchParams.get("date"); // yyyy-MM-dd
   if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
     return NextResponse.json({ error: "缺少或格式錯誤的 date 參數（需 yyyy-MM-dd）" }, { status: 400 });
+  }
+
+  // 系統改為現場掃 QR Code 當天登記，只開放查詢「今天」的場次。前台畫面本來就只查今天，
+  // 這裡在後端也擋住，避免有人直接呼叫 API 查到（進而預約）未來日期的場次。
+  if (dateStr !== todayDateStringInTaipei()) {
+    return NextResponse.json({ error: "僅開放當天場次登記", code: "NOT_TODAY" }, { status: 400 });
   }
 
   const event = await prisma.event.findFirst({ orderBy: { createdAt: "asc" } });
