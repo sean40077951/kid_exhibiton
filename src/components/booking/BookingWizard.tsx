@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import StepRegister, { type BookingResult } from "./StepRegister";
 import StepSuccess from "./StepSuccess";
+import RichIntro from "./RichIntro";
 import { formatDate, todayDateStringInTaipei } from "@/lib/timezone";
 
 type EventConfig = {
   name: string;
-  bannerText: string;
   introText: string;
   noticeText: string;
   consentText: string;
@@ -67,7 +67,6 @@ export default function BookingWizard() {
               <section className="relative grid overflow-hidden shadow-soft md:grid-cols-2">
                 <IntroPanel
                   eventName={event?.name ?? "體驗登記系統"}
-                  bannerText={event?.bannerText ?? ""}
                   introText={event?.introText ?? ""}
                 />
 
@@ -108,14 +107,14 @@ export default function BookingWizard() {
   );
 }
 
-function IntroPanel({ eventName, bannerText, introText }: { eventName: string; bannerText: string; introText: string }) {
+function IntroPanel({ eventName, introText }: { eventName: string; introText: string }) {
   return (
     <div className="space-y-4 bg-[#FBF8F2] px-5 py-8 md:px-10 md:py-16">
-      {bannerText && (
-        <p className="rounded-lg bg-skyblue px-4 py-2.5 text-sm font-bold text-white">{bannerText}</p>
+      {/* 展覽介紹裡自己寫了「# 大標題」時就不再重複顯示展會名稱。 */}
+      {!/^# /m.test(introText) && (
+        <h1 className="text-2xl font-bold leading-snug text-ink md:text-3xl">{eventName}</h1>
       )}
-      <h1 className="text-2xl font-bold leading-snug text-ink md:text-3xl">{eventName}</h1>
-      {introText && <p className="whitespace-pre-line text-sm leading-7 text-ink">{introText}</p>}
+      {introText && <RichIntro source={introText} />}
     </div>
   );
 }

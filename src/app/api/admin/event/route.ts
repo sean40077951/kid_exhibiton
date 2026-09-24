@@ -5,7 +5,7 @@ import type { PhaseOpenRule } from "@/lib/phase-rules";
 
 export const dynamic = "force-dynamic";
 
-// 布告欄文字（業主須知回覆 4-3）與分階段開放日期，後台皆可自行編輯，
+// 展覽介紹與分階段開放日期，後台皆可自行編輯，
 // 不用再麻煩工程師手動改資料庫（業主要求更有彈性，不要寫死在種子資料裡）。
 export async function GET() {
   const event = await prisma.event.findFirst({ orderBy: { createdAt: "asc" } });
@@ -14,14 +14,12 @@ export async function GET() {
   }
   return NextResponse.json({
     id: event.id,
-    bannerText: event.bannerText,
     introText: event.introText,
     phaseOpenRules: event.phaseOpenRules as PhaseOpenRule[]
   });
 }
 
 const bodySchema = z.object({
-  bannerText: z.string().max(500, "布告欄文字太長，請控制在 500 字以內"),
   introText: z.string().max(1000, "展覽介紹文字太長，請控制在 1000 字以內"),
   phaseOpenRules: z
     .array(
@@ -53,7 +51,6 @@ export async function PATCH(req: NextRequest) {
   const updated = await prisma.event.update({
     where: { id: event.id },
     data: {
-      bannerText: parsed.data.bannerText,
       introText: parsed.data.introText,
       phaseOpenRules: parsed.data.phaseOpenRules
     }
@@ -61,7 +58,6 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({
     id: updated.id,
-    bannerText: updated.bannerText,
     introText: updated.introText,
     phaseOpenRules: updated.phaseOpenRules as PhaseOpenRule[]
   });

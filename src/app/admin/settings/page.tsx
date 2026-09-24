@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
+import RichIntro from "@/components/booking/RichIntro";
 
 type PhaseOpenRule = { openDate: string; appliesToMonth: string };
 
 export default function AdminSettingsPage() {
-  const [bannerText, setBannerText] = useState("");
   const [introText, setIntroText] = useState("");
   const [phaseOpenRules, setPhaseOpenRules] = useState<PhaseOpenRule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +18,6 @@ export default function AdminSettingsPage() {
     fetch("/api/admin/event")
       .then((r) => r.json())
       .then((data) => {
-        setBannerText(data.bannerText ?? "");
         setIntroText(data.introText ?? "");
         setPhaseOpenRules(data.phaseOpenRules ?? []);
       })
@@ -45,7 +44,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/event", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bannerText, introText, phaseOpenRules })
+        body: JSON.stringify({ introText, phaseOpenRules })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -65,25 +64,16 @@ export default function AdminSettingsPage() {
 
       <div className="space-y-6 rounded-eight border-[3px] border-ink bg-card p-4 shadow-hardsm">
         <label className="block text-sm">
-          <span className="mb-1 block font-bold text-ink">布告欄文字</span>
-          <span className="mb-2 block text-xs text-muted">顯示在前台選日期頁面上方，可隨時更新（例如臨時休館公告）</span>
-          {loading ? (
-            <p className="text-sm text-muted">載入中…</p>
-          ) : (
-            <textarea
-              value={bannerText}
-              onChange={(e) => setBannerText(e.target.value)}
-              rows={4}
-              maxLength={500}
-              className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
-            />
-          )}
-        </label>
-
-        <label className="block text-sm">
           <span className="mb-1 block font-bold text-ink">展覽介紹</span>
-          <span className="mb-2 block text-xs text-muted">
-            顯示在前台登記頁面左欄（桌機版）／登記表單上方（手機版），可包含活動簡介、開放時間、地點等內容，換行會保留。
+          <span className="mb-2 block text-xs leading-5 text-muted">
+            顯示在前台登記頁面左欄（桌機）／表單上方（手機）。用下面的符號設定文字樣式，下方會即時預覽：
+          </span>
+          <span className="mb-2 block rounded-eight bg-line/40 p-2 text-xs leading-6 text-ink">
+            <code># 文字</code>　大標題　<code>## 文字</code>　粗體小標題　<code>**文字**</code>　行內粗體
+            <br />
+            <code>&gt; 文字</code>　灰色小字　<code>@時間 文字</code>　灰字＋時鐘圖示　<code>@地點 文字</code>　灰字＋地點圖示
+            <br />
+            <code>---</code>　虛線分隔　空一行＝段落間距
           </span>
           {loading ? (
             <p className="text-sm text-muted">載入中…</p>
@@ -97,6 +87,15 @@ export default function AdminSettingsPage() {
             />
           )}
         </label>
+
+        {!loading && introText.trim() && (
+          <div>
+            <span className="mb-1 block text-sm font-bold text-ink">前台預覽</span>
+            <div className="rounded-eight border-2 border-line bg-[#FBF8F2] p-4">
+              <RichIntro source={introText} />
+            </div>
+          </div>
+        )}
 
         <div>
           <span className="mb-1 block text-sm font-bold text-ink">分階段開放日期</span>

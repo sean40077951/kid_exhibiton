@@ -22,7 +22,6 @@ export async function GET(req: NextRequest) {
     dateRangeEnd: event.dateRangeEnd,
     closedWeekday: event.closedWeekday,
     phaseOpenRules: event.phaseOpenRules,
-    bannerText: event.bannerText,
     introText: event.introText,
     noticeText: event.noticeText,
     consentText: event.consentText,
