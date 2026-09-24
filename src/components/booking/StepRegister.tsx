@@ -37,6 +37,7 @@ export default function StepRegister({
   const [loading, setLoading] = useState(true);
   const [loadBusy, setLoadBusy] = useState(false);
   const [qrExpired, setQrExpired] = useState(false); // 開著頁面跨過午夜，通行 cookie 已失效
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [headcount, setHeadcount] = useState<number | null>(null);
@@ -65,7 +66,11 @@ export default function StepRegister({
       .then((data) => {
         setSessions(data.sessions ?? []);
         setQrExpired(data.code === "QR_REQUIRED");
+        setLoadFailed(false);
       })
+      // 伺服器忙碌或出錯時回的不是 JSON（例如 500 空內容），不能讓它變成沒接住的錯誤，
+      // 也不能誤顯示成「今天沒有場次」。
+      .catch(() => setLoadFailed(true))
       .finally(() => {
         clearTimeout(busyTimer);
         setLoadBusy(false);
@@ -158,7 +163,10 @@ export default function StepRegister({
         {!loading && qrExpired && (
           <p className="text-sm font-bold text-ink">QR Code 已過期，請掃描現場今天最新的 QR Code 再登記。</p>
         )}
-        {!loading && !qrExpired && sessions.length === 0 && (
+        {!loading && loadFailed && (
+          <p className="text-sm font-bold text-ink">場次載入失敗，請稍後重新整理頁面再試一次。</p>
+        )}
+        {!loading && !qrExpired && !loadFailed && sessions.length === 0 && (
           <p className="text-sm text-muted">今天沒有可登記的場次了。</p>
         )}
 

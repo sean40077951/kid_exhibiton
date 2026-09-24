@@ -43,9 +43,10 @@ export default function BookingWizard() {
       <div className="mx-auto w-full max-w-[1320px]">
         <div className="frame-bg relative">
           <FrameBackground />
+          <MobileFrameBackground />
           <SiteHeader />
 
-          <div className="relative px-3 pb-6 pt-3 md:px-[5%] md:pb-[4%] md:pt-2">
+          <div className="relative px-4 pb-14 pt-4 md:px-[5%] md:pb-[4%] md:pt-2">
             {eventEnded ? (
               <section className="relative bg-white px-6 py-16 text-center shadow-soft">
                 <p className="text-xl font-bold text-ink">本次活動已結束</p>
@@ -124,7 +125,7 @@ function IntroPanel({ eventName, bannerText, introText }: { eventName: string; b
 // 手機版照參考稿改成整條白色橫條，logo 收在橫條右側。
 function SiteHeader() {
   return (
-    <header className="relative flex items-start justify-between px-3 pt-3 md:px-4 md:pt-4">
+    <header className="relative flex items-start justify-between px-4 pt-4">
       <div className="flex w-full items-center gap-3 rounded-2xl bg-white py-1.5 pl-4 pr-2 shadow-softsm md:w-auto md:py-2 md:pr-4">
         <span className="text-lg font-black text-pink">怪獸放電場</span>
         <span className="rounded-full bg-pink px-3 py-1 text-xs font-bold text-white">線上登記</span>
@@ -172,6 +173,37 @@ const FRAME_PIECES: FramePiece[] = [
   { src: "edge-bottom", left: 59.072, top: 73.742, width: 18.144, height: 26.258 },
   { src: "corner-br", left: 77.216, top: 73.742, width: 22.784, height: 26.258 }
 ];
+
+// 手機版花瓣邊框：四角各放一張角落圖，上下緣與左右緣只鋪在角落之間，彼此不重疊
+// （之前整條鋪到底，角落會有好幾張圖疊在一起）。尺寸以左右緣寬 120px 為基準，
+// 高度照原圖比例換算；background-repeat: round 讓每段都剛好放整數張、不會切一半。
+const M_SIDE_W = 120; // edge-left/right、corner 寬
+const M_TOP_H = 132; // corner-tl/tr、edge-top 高（361 × 120 / 329）
+const M_BOTTOM_H = 131; // corner-bl/br、edge-bottom 高（360 × 120 / 329）
+
+function MobileFrameBackground() {
+  const strip = (src: string, style: React.CSSProperties, size: string, repeat: string) => (
+    <div
+      className="absolute"
+      style={{ ...style, backgroundImage: `url(/pattern/${src}.png)`, backgroundSize: size, backgroundRepeat: repeat }}
+    />
+  );
+  const corner = (src: string, style: React.CSSProperties, h: number) => (
+    <img src={`/pattern/${src}.png`} alt="" className="absolute" style={{ ...style, width: M_SIDE_W, height: h }} />
+  );
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden md:hidden" aria-hidden="true">
+      {strip("edge-top", { top: 0, left: M_SIDE_W, right: M_SIDE_W, height: M_TOP_H }, `auto ${M_TOP_H}px`, "round no-repeat")}
+      {strip("edge-bottom", { bottom: 0, left: M_SIDE_W, right: M_SIDE_W, height: M_BOTTOM_H }, `auto ${M_BOTTOM_H}px`, "round no-repeat")}
+      {strip("edge-left", { top: M_TOP_H, bottom: M_BOTTOM_H, left: 0, width: M_SIDE_W }, `${M_SIDE_W}px auto`, "no-repeat round")}
+      {strip("edge-right", { top: M_TOP_H, bottom: M_BOTTOM_H, right: 0, width: M_SIDE_W }, `${M_SIDE_W}px auto`, "no-repeat round")}
+      {corner("corner-tl", { top: 0, left: 0 }, M_TOP_H)}
+      {corner("corner-tr", { top: 0, right: 0 }, M_TOP_H)}
+      {corner("corner-bl", { bottom: 0, left: 0 }, M_BOTTOM_H)}
+      {corner("corner-br", { bottom: 0, right: 0 }, M_BOTTOM_H)}
+    </div>
+  );
+}
 
 function FrameBackground() {
   return (

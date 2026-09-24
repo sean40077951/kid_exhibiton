@@ -38,25 +38,8 @@ body {
   @apply bg-paper text-ink font-sans;
 }
 
-/* 「體驗登記系統」花瓣邊框的底色。桌機版的 14 張花瓣圖用絕對定位 <img> 排
-   （見 BookingWizard.tsx 的 FrameBackground）。手機版畫面窄長，照桌機比例會把花瓣
-   拉成細長橢圓，改成左右兩側、上緣各一排固定大小重複的花瓣邊（這裡只用 left/right/top
-   對齊邊緣，沒有 % 定位的問題）。 */
+/* 「體驗登記系統」花瓣邊框的藍色底色。花瓣圖本身見 BookingWizard.tsx：
+   桌機用 FrameBackground（14 張照比例擺放），手機用 MobileFrameBackground（固定尺寸）。 */
 .frame-bg {
   background-color: #2fa3de;
-  background-image: url("/pattern/edge-top.png"), url("/pattern/edge-left.png"), url("/pattern/edge-right.png");
-  background-position:
-    left top,
-    left top,
-    right top;
-  background-repeat: repeat-x, repeat-y, repeat-y;
-  background-size:
-    56px auto,
-    56px auto,
-    56px auto;
-}
-@media (min-width: 768px) {
-  .frame-bg {
-    background-image: none;
-  }
 }
