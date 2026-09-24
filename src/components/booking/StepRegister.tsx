@@ -45,6 +45,7 @@ export default function StepRegister({
   const [email, setEmail] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [consent, setConsent] = useState(false);
+  const [termsViewed, setTermsViewed] = useState(false); // 需先點開條款彈窗看過才能勾選同意
   const [website, setWebsite] = useState(""); // honeypot
 
   const [error, setError] = useState<string | null>(null);
@@ -244,22 +245,25 @@ export default function StepRegister({
       </Section>
 
       {/* 參考稿只有一行勾選；送出須知與個資聲明收進可點開的彈窗，內容不變。 */}
+      {/* 需先點開條款看過一次，checkbox 才會解鎖可勾選。 */}
       <div className="flex items-start gap-2 text-xs text-muted">
         <input
           id="consent"
           type="checkbox"
           checked={consent}
+          disabled={!termsViewed}
           onChange={(e) => setConsent(e.target.checked)}
-          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-pink"
+          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-pink disabled:cursor-not-allowed disabled:opacity-50"
         />
         <span>
-          <label htmlFor="consent" className="cursor-pointer">
+          <label htmlFor="consent" className={termsViewed ? "cursor-pointer" : "cursor-not-allowed"}>
             我已閱讀並同意
           </label>{" "}
           <button type="button" onClick={() => setTermsOpen(true)} className="font-bold text-ink underline">
             隱私權條款 &amp; 體驗安全須知
           </button>
           <span className="text-pink"> *</span>
+          {!termsViewed && <span className="mt-1 block text-hotred">請先點選並閱讀上方條款，才能勾選同意。</span>}
         </span>
       </div>
 
@@ -279,7 +283,15 @@ export default function StepRegister({
       </button>
 
       {modalMessage && <Modal title={modalMessage} onClose={() => setModalMessage(null)} />}
-      {termsOpen && <TermsModal consentText={consentText} onClose={() => setTermsOpen(false)} />}
+      {termsOpen && (
+        <TermsModal
+          consentText={consentText}
+          onClose={() => {
+            setTermsOpen(false);
+            setTermsViewed(true);
+          }}
+        />
+      )}
     </form>
   );
 }
