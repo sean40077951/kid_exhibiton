@@ -38,7 +38,7 @@ export default function AdminLoginPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-paper p-6">
       <div className="w-full max-w-sm rounded-blob border-[3px] border-ink bg-card p-6 shadow-hardlg">
-        <h1 className="mb-6 font-display text-xl font-bold text-ink">怪獸放電場｜後台登入</h1>
+        <h1 className="mb-6 font-display text-xl font-bold text-ink">體驗登記系統｜後台登入</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block text-sm font-bold text-ink">
             帳號

@@ -66,7 +66,7 @@ export default function BookingWizard() {
             ) : (
               <section className="relative grid overflow-hidden shadow-soft md:grid-cols-2">
                 <IntroPanel
-                  eventName={event?.name ?? "怪獸放電場"}
+                  eventName={event?.name ?? "體驗登記系統"}
                   bannerText={event?.bannerText ?? ""}
                   introText={event?.introText ?? ""}
                 />
@@ -78,7 +78,7 @@ export default function BookingWizard() {
 
                   {/* 手機版上下堆疊，參考稿在登記區開頭重複一次活動名稱。 */}
                   <h2 className="mb-6 text-xl font-bold leading-snug text-ink md:hidden">
-                    {event?.name ?? "怪獸放電場"}
+                    {event?.name ?? "體驗登記系統"}
                   </h2>
 
                   {!result && (
@@ -127,7 +127,7 @@ function SiteHeader() {
   return (
     <header className="relative flex items-start justify-between px-4 pt-4">
       <div className="flex w-full items-center gap-3 rounded-2xl bg-white py-1.5 pl-4 pr-2 shadow-softsm md:w-auto md:py-2 md:pr-4">
-        <span className="text-lg font-black text-pink">怪獸放電場</span>
+        <span className="text-lg font-black text-pink">體驗登記系統</span>
         <span className="rounded-full bg-pink px-3 py-1 text-xs font-bold text-white">線上登記</span>
         <img src="/pattern/logo-newtaipei.png" alt="" aria-hidden="true" className="ml-auto h-10 w-auto md:hidden" />
       </div>
@@ -142,7 +142,7 @@ function SiteHeader() {
 function Footer() {
   return (
     <footer className="bg-[#FFF200] px-5 py-6 text-sm font-bold text-ink md:px-[4%]">
-      © {new Date().getFullYear()} 怪獸放電場. All rights reserved.
+      © {new Date().getFullYear()} 體驗登記系統. All rights reserved.
     </footer>
   );
 }

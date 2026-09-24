@@ -6,7 +6,6 @@ type BookingRow = {
   id: string;
   bookingCode: string;
   name: string;
-  phone: string;
   email: string;
   headcount: number;
   date: string;
@@ -130,7 +129,6 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
             <tr>
               <Th>預約編號</Th>
               <Th>姓名</Th>
-              <Th>電話</Th>
               <Th>信箱</Th>
               <Th>日期</Th>
               <Th>場次</Th>
@@ -145,7 +143,6 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
               <tr key={r.id} className={`border-t border-line ${r.status === "cancelled" ? "opacity-50" : ""}`}>
                 <Td className="font-display font-bold">{r.bookingCode}</Td>
                 <Td>{r.name}</Td>
-                <Td>{r.phone}</Td>
                 <Td>{r.email}</Td>
                 <Td>{r.date}</Td>
                 <Td>{r.timeSlot}</Td>
@@ -179,7 +176,7 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
             ))}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={10} className="p-4 text-center text-muted">
+                <td colSpan={9} className="p-4 text-center text-muted">
                   沒有符合條件的預約
                 </td>
               </tr>

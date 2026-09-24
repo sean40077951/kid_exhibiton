@@ -16,10 +16,8 @@ const bodySchema = z.object({
     .string({ required_error: "請填寫姓名" })
     .trim()
     .min(1, "請填寫姓名"),
-  phone: z
-    .string({ required_error: "請填寫聯絡電話" })
-    .trim()
-    .min(8, "請填寫正確的聯絡電話"),
+  // 業主取消收集聯絡電話；資料庫欄位仍是必填字串，所以沒帶就存空字串。
+  phone: z.string().trim().default(""),
   email: z
     .string({ required_error: "請填寫電子信箱" })
     .trim()

@@ -42,7 +42,6 @@ export default function StepRegister({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [headcount, setHeadcount] = useState<number | null>(null);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [consent, setConsent] = useState(false);
@@ -105,7 +104,7 @@ export default function StepRegister({
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: selected.id, name, phone, email, headcount, consent: true, website })
+        body: JSON.stringify({ sessionId: selected.id, name, email, headcount, consent: true, website })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -217,29 +216,22 @@ export default function StepRegister({
               className={INPUT}
             />
           </Field>
-          <Field label="聯絡電話">
-            <input
-              required
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="09xxxxxxxx"
-              className={INPUT}
-            />
-          </Field>
-        </div>
-        <div className="mt-3">
-          <Field label="E-mail">
-            <input
-              required
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={() => setEmailTouched(true)}
-              placeholder="請輸入 E-mail"
-              className={`${INPUT} ${emailInvalid ? "border-hotred" : ""}`}
-            />
-          </Field>
-          {emailInvalid && <p className="mt-1 text-xs font-bold text-hotred">信箱格式不正確，確認信會寄到這個信箱，請再確認一次。</p>}
+          <div>
+            <Field label="E-mail">
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={() => setEmailTouched(true)}
+                placeholder="請輸入 E-mail"
+                className={`${INPUT} ${emailInvalid ? "border-hotred" : ""}`}
+              />
+            </Field>
+            {emailInvalid && (
+              <p className="mt-1 text-xs font-bold text-hotred">信箱格式不正確，確認信會寄到這個信箱，請再確認一次。</p>
+            )}
+          </div>
         </div>
 
         {/* Honeypot：sr-only 隱藏而非 display:none 或 -9999px，避免手機瀏覽器把整頁橫向撐開。 */}

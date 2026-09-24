@@ -85,7 +85,7 @@ export default function AdminQrPage() {
     ctx.fillStyle = "#111";
     ctx.textAlign = "center";
     ctx.font = "bold 56px sans-serif";
-    ctx.fillText("怪獸放電場　現場登記", 500, 90);
+    ctx.fillText("體驗登記系統　現場登記", 500, 90);
     ctx.font = "bold 72px sans-serif";
     ctx.fillText(info.date.replace(/-/g, "/"), 500, 180);
     ctx.drawImage(qr, 50, 230, 900, 900);

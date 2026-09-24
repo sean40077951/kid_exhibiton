@@ -41,12 +41,11 @@ export async function GET(req: NextRequest) {
   const sheet = workbook.addWorksheet("預約資料");
 
   // 每欄都設寬度，時間戳記這種容易被 Excel 顯示成 ### 的欄位才不會擠在一起；
-  // 電話／日期／時間戳記一律用純文字寫入（不是數字或日期型別），Excel 開啟時不會
-  // 把電話開頭的 0 吃掉，也不會因為時區重新解讀日期時間。
+  // 日期／時間戳記一律用純文字寫入（不是數字或日期型別），Excel 開啟時不會
+  // 因為時區重新解讀日期時間。
   sheet.columns = [
     { header: "預約編號", key: "bookingCode", width: 20 },
     { header: "姓名", key: "name", width: 14 },
-    { header: "電話", key: "phone", width: 16, style: { numFmt: "@" } },
     { header: "信箱", key: "email", width: 26 },
     { header: "人數", key: "headcount", width: 8 },
     { header: "預約日期", key: "bookingDate", width: 14, style: { numFmt: "@" } },
@@ -60,7 +59,6 @@ export async function GET(req: NextRequest) {
     sheet.addRow({
       bookingCode: b.bookingCode,
       name: b.name,
-      phone: b.phone,
       email: b.email,
       headcount: b.headcount,
       bookingDate: formatDate(b.bookingDate, "yyyy-MM-dd"),

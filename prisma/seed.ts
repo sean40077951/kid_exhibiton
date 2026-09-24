@@ -26,7 +26,7 @@ async function main() {
     update: {},
     create: {
       id: "seed-event-monsters",
-      name: "怪獸放電場｜兒藝節秋季展期",
+      name: "體驗登記系統｜兒藝節秋季展期",
       themeSettings: {},
       dateRangeStart: dateStringToUtcMidnight("2026-10-10"),
       dateRangeEnd: dateStringToUtcMidnight("2026-12-27"),
@@ -43,7 +43,7 @@ async function main() {
       emailTemplate: "",
       // Step 3（填寫預約資料頁）勾選框旁的個資同意聲明文字，同樣照線稿逐字打上。
       consentText:
-        "勾選：於本網站或填寫之個人資料（包含姓名、聯絡電話、電子信箱）僅作為「怪獸放電場」展覽預約使用，不作為其他商業用途，亦不會提供於第三方。本活動結束後，相關個人資料將依法定予以銷毀。送出此預約表單，即視為同意本活動之個人資料使用方式。",
+        "勾選：於本網站或填寫之個人資料（包含姓名、聯絡電話、電子信箱）僅作為「體驗登記系統」展覽預約使用，不作為其他商業用途，亦不會提供於第三方。本活動結束後，相關個人資料將依法定予以銷毀。送出此預約表單，即視為同意本活動之個人資料使用方式。",
       consentVersion: "v1",
       dataRetentionDays: 365
     }

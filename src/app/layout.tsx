@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "怪獸放電場｜線上預約",
+  title: "體驗登記系統｜線上登記",
   description: "兒藝節秋季展期 線上預約系統"
 };
 

@@ -26,7 +26,6 @@ export async function GET(req: NextRequest) {
       id: b.id,
       bookingCode: b.bookingCode,
       name: b.name,
-      phone: b.phone,
       email: b.email,
       headcount: b.headcount,
       date: formatDate(b.bookingDate, "yyyy-MM-dd"),
