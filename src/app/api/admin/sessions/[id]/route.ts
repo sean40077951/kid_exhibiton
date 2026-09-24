@@ -36,7 +36,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       }
 
       const bookedSum = await tx.booking.aggregate({
-        where: { sessionId: params.id },
+        where: { sessionId: params.id, status: { not: "cancelled" } },
         _sum: { headcount: true }
       });
       const booked = bookedSum._sum.headcount ?? 0;

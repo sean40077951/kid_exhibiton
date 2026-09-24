@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   // capacity - remaining 會比真正的已預約人數少，畫面上會誤導管理者。
   const bookedSums = await prisma.booking.groupBy({
     by: ["sessionId"],
-    where: { sessionId: { in: sessions.map((s) => s.id) } },
+    where: { sessionId: { in: sessions.map((s) => s.id) }, status: { not: "cancelled" } },
     _sum: { headcount: true }
   });
   const bookedBySessionId = new Map(bookedSums.map((b) => [b.sessionId, b._sum.headcount ?? 0]));
