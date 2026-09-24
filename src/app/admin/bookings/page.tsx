@@ -127,6 +127,7 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
         <table className="w-full text-sm">
           <thead className="bg-line/40">
             <tr>
+              <Th>操作</Th>
               <Th>預約編號</Th>
               <Th>姓名</Th>
               <Th>信箱</Th>
@@ -135,12 +136,23 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
               <Th>人數</Th>
               <Th>狀態</Th>
               <Th>預約時間戳記</Th>
-              <Th>操作</Th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.id} className={`border-t border-line ${r.status === "cancelled" ? "opacity-50" : ""}`}>
+                <Td>
+                  {r.status !== "cancelled" && (
+                    <button
+                      type="button"
+                      onClick={() => cancelBooking(r)}
+                      disabled={cancellingId === r.id}
+                      className="rounded-eight border-2 border-red px-2 py-0.5 text-xs font-bold text-red hover:bg-red/10 disabled:opacity-40"
+                    >
+                      {cancellingId === r.id ? "取消中…" : "取消預約"}
+                    </button>
+                  )}
+                </Td>
                 <Td className="font-display font-bold">{r.bookingCode}</Td>
                 <Td>{r.name}</Td>
                 <Td>{r.email}</Td>
@@ -159,18 +171,6 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
                     second: "2-digit",
                     hour12: false
                   })}
-                </Td>
-                <Td>
-                  {r.status !== "cancelled" && (
-                    <button
-                      type="button"
-                      onClick={() => cancelBooking(r)}
-                      disabled={cancellingId === r.id}
-                      className="rounded-eight border-2 border-red px-2 py-0.5 text-xs font-bold text-red hover:bg-red/10 disabled:opacity-40"
-                    >
-                      {cancellingId === r.id ? "取消中…" : "取消預約"}
-                    </button>
-                  )}
                 </Td>
               </tr>
             ))}
