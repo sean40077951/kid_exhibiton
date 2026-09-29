@@ -18,7 +18,15 @@ type EventConfig = {
 // 版面照業主提供的「體驗登記系統」Figma 參考稿：
 // 藍底花瓣邊框鋪滿固定寬度畫布（畫布外留白），頁首是浮在邊框上的白色小框，
 // 中間一張直角卡片，桌機左右兩欄（左米白＝活動介紹、右純白＝登記表單），手機上下堆疊。
-export default function BookingWizard() {
+export default function BookingWizard({
+  previewMode = false,
+  previewDate
+}: {
+  // 後台「前台預覽」用（src/app/admin/preview/page.tsx）：可以看任何一天的畫面，
+  // 不受「本次活動已結束」「QR 門禁」影響，送出登記也不會真的建立預約。
+  previewMode?: boolean;
+  previewDate?: string;
+}) {
   const [event, setEvent] = useState<EventConfig | null>(null);
   const [result, setResult] = useState<BookingResult | null>(null);
   const [scanInvalid, setScanInvalid] = useState(false);
@@ -32,11 +40,15 @@ export default function BookingWizard() {
       .catch(() => setEvent(null));
   }, []);
 
-  // 展期結束後頁面全部關閉（業主須知回覆 4-2），要有明確的結束畫面。
-  const eventEnded = event ? todayDateStringInTaipei() > formatDate(event.dateRangeEnd, "yyyy-MM-dd") : false;
+  const dateStr = previewMode && previewDate ? previewDate : todayDateStringInTaipei();
+
+  // 展期結束後頁面全部關閉（業主須知回覆 4-2），要有明確的結束畫面。預覽模式下不套用，
+  // 讓管理者可以檢查展期結束日之後、或還沒開展前的畫面長怎樣。
+  const eventEnded = !previewMode && event ? todayDateStringInTaipei() > formatDate(event.dateRangeEnd, "yyyy-MM-dd") : false;
 
   // 門禁開啟、且這個瀏覽器還沒掃過今天的 QR Code：不顯示表單，請對方掃現場 QR Code。
-  const gated = event ? event.qrGate.enabled && !event.qrGate.passed : false;
+  // 預覽模式一律不套用門禁，管理者不用另外掃 QR Code 才能檢查畫面。
+  const gated = !previewMode && event ? event.qrGate.enabled && !event.qrGate.passed : false;
 
   return (
     <div className="min-h-screen bg-white">
@@ -82,9 +94,10 @@ export default function BookingWizard() {
 
                   {!result && (
                     <StepRegister
-                      dateStr={todayDateStringInTaipei()}
+                      dateStr={dateStr}
                       consentText={event?.consentText ?? ""}
                       onDone={(res) => setResult(res)}
+                      previewMode={previewMode}
                     />
                   )}
 

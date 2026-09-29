@@ -27,11 +27,16 @@ const INPUT =
 export default function StepRegister({
   dateStr,
   consentText,
-  onDone
+  onDone,
+  previewMode = false
 }: {
   dateStr: string;
   consentText: string;
   onDone: (result: BookingResult) => void;
+  // 後台「前台預覽」用（src/app/admin/preview/page.tsx）：改查不限制日期的後台專用場次
+  // API，且送出時不會真的打預約 API，只跳提示。畫面其餘部分跟真正的前台完全一樣，
+  // 才能準確看出某天場次多寡會不會跑版。
+  previewMode?: boolean;
 }) {
   const [sessions, setSessions] = useState<SessionOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +66,7 @@ export default function StepRegister({
     setLoading(true);
     setLoadBusy(false);
     const busyTimer = setTimeout(() => setLoadBusy(true), 3000);
-    fetch(`/api/sessions?date=${dateStr}`)
+    fetch(previewMode ? `/api/admin/preview-sessions?date=${dateStr}` : `/api/sessions?date=${dateStr}`)
       .then((r) => r.json())
       .then((data) => {
         setSessions(data.sessions ?? []);
@@ -77,7 +82,7 @@ export default function StepRegister({
         setLoading(false);
       });
     return () => clearTimeout(busyTimer);
-  }, [dateStr]);
+  }, [dateStr, previewMode]);
 
   function selectHeadcount(n: number) {
     setHeadcount(n);
@@ -96,6 +101,12 @@ export default function StepRegister({
     }
     if (!consent) {
       setError("請先閱讀並勾選入場注意事項與個資使用同意聲明。");
+      return;
+    }
+
+    // 後台預覽模式：畫面照真的流程跑，但不能真的建立預約，到這一步就攔下來。
+    if (previewMode) {
+      setModalMessage("這是後台預覽畫面，不會真的送出預約喔！");
       return;
     }
 
@@ -167,7 +178,7 @@ export default function StepRegister({
           <p className="text-sm font-bold text-ink">場次載入失敗，請稍後重新整理頁面再試一次。</p>
         )}
         {!loading && !qrExpired && !loadFailed && sessions.length === 0 && (
-          <p className="text-sm text-muted">今天沒有可登記的場次了。</p>
+          <p className="text-sm text-muted">{previewMode ? "這天沒有可登記的場次。" : "今天沒有可登記的場次了。"}</p>
         )}
 
         <div className="grid grid-cols-2 gap-2.5">
