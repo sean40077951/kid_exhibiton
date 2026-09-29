@@ -92,7 +92,10 @@ export async function POST(req: NextRequest) {
   const phoneNormalized = normalizePhone(input.phone);
 
   try {
-    const session = await prisma.session.findUnique({ where: { id: input.sessionId } });
+    const session = await prisma.session.findUnique({
+      where: { id: input.sessionId },
+      include: { event: { select: { name: true, noticeText: true } } }
+    });
     if (!session) {
       return NextResponse.json({ error: "找不到此場次，請重新選擇" }, { status: 404 });
     }
@@ -169,11 +172,12 @@ export async function POST(req: NextRequest) {
     sendConfirmationEmail({
       to: booking.email,
       name: booking.name,
+      eventName: session.event.name,
       bookingCode: booking.bookingCode,
       dateStr: formatDate(booking.bookingDate, "yyyy-MM-dd"),
       timeSlot: session.timeSlot,
       headcount: booking.headcount,
-      noticeText: ""
+      noticeText: session.event.noticeText
     }).catch((e) => console.error("[mailer] 確認信寄送失敗", e));
 
     return NextResponse.json({
