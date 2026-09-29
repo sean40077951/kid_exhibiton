@@ -122,25 +122,38 @@ export default function BookingWizard({
 
 function IntroPanel({ eventName, introText }: { eventName: string; introText: string }) {
   return (
-    <div className="space-y-4 bg-[#FBF8F2] px-5 py-8 md:px-10 md:py-16">
+    <div className="relative space-y-4 bg-[#FDF9F5] px-5 py-8 md:px-10 md:py-16">
       {/* 展覽介紹裡自己寫了「# 大標題」時就不再重複顯示展會名稱。 */}
       {!/^# /m.test(introText) && (
         <h1 className="text-2xl font-bold leading-snug text-ink md:text-3xl">{eventName}</h1>
       )}
       {introText && <RichIntro source={introText} />}
+      {/* 業主第二版素材：右上藍色怪獸、左下兩隻橘色怪獸。放在文字之後、絕對定位，不影響排版。 */}
+      <img
+        src="/monsters/intro-blue.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute right-4 top-14 w-24 md:right-10 md:top-28 md:w-40"
+      />
+      <img
+        src="/monsters/intro-pair.png"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-2 left-3 w-28 md:bottom-4 md:left-8 md:w-40"
+      />
+      <div className="h-24 md:h-32" aria-hidden="true" />
     </div>
   );
 }
 
-// 頁首：浮在花瓣邊框上的白色圓角小框（左），政府合作 logo 放在右上角白色方塊。
+// 頁首：浮在花瓣邊框上的白色圓角小框（左，放「怪獸放電場 PLAY TOGETHER!」標題圖），政府合作 logo 放在右上角白色方塊。
 // 參考稿小框裡還有「競技場介紹／選手登入」等選單，系統沒有對應頁面，不放。
 // 手機版照參考稿改成整條白色橫條，logo 收在橫條右側。
 function SiteHeader() {
   return (
     <header className="relative flex items-start justify-between px-4 pt-4">
-      <div className="flex w-full items-center gap-3 rounded-2xl bg-white py-1.5 pl-4 pr-2 shadow-softsm md:w-auto md:py-2 md:pr-4">
-        <span className="text-lg font-black text-pink">體驗登記系統</span>
-        <span className="rounded-full bg-pink px-3 py-1 text-xs font-bold text-white">線上登記</span>
+      <div className="flex w-full items-center gap-3 rounded-2xl bg-white py-1.5 pl-4 pr-2 shadow-softsm md:w-auto md:py-2 md:pr-6">
+        <img src="/pattern/logo-play-together.png" alt="怪獸放電場 PLAY TOGETHER!" className="h-8 w-auto md:h-10" />
         <img src="/pattern/logo-newtaipei.png" alt="" aria-hidden="true" className="ml-auto h-10 w-auto md:hidden" />
       </div>
       <div className="absolute right-0 top-0 hidden bg-white p-1.5 md:block">
@@ -150,10 +163,11 @@ function SiteHeader() {
   );
 }
 
-// 頁尾：亮黃色，版權文字靠左。參考稿右側的隱私政策等連結系統沒有對應頁面，不放。
+// 頁尾：業主第二版素材包改成玫瑰粉色底、白字，版權文字靠左。
+// 參考稿右側的隱私政策等連結系統沒有對應頁面，不放。
 function Footer() {
   return (
-    <footer className="bg-[#FFF200] px-5 py-6 text-sm font-bold text-ink md:px-[4%]">
+    <footer className="bg-[#C5707D] px-5 py-6 text-sm font-bold text-white md:px-[4%]">
       © {new Date().getFullYear()} 體驗登記系統. All rights reserved.
     </footer>
   );

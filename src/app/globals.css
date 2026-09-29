@@ -38,8 +38,9 @@ body {
   @apply bg-paper text-ink font-sans;
 }
 
-/* 「體驗登記系統」花瓣邊框的藍色底色。花瓣圖本身見 BookingWizard.tsx：
-   桌機用 FrameBackground（14 張照比例擺放），手機用 MobileFrameBackground（固定尺寸）。 */
+/* 「體驗登記系統」花瓣邊框的底色。業主第二版素材包（ui/網頁素材包.ai）把配色從
+   藍＋綠換成暖灰＋金黃；public/pattern/ 的 8 張花瓣圖已重新上色成金黃色（#E1BA43）。
+   花瓣圖見 BookingWizard.tsx：桌機用 FrameBackground，手機用 MobileFrameBackground。 */
 .frame-bg {
-  background-color: #2fa3de;
+  background-color: #ece0d5;
 }
