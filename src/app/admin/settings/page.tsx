@@ -8,6 +8,7 @@ type PhaseOpenRule = { openDate: string; appliesToMonth: string };
 
 export default function AdminSettingsPage() {
   const [introText, setIntroText] = useState("");
+  const [noticeText, setNoticeText] = useState("");
   const [phaseOpenRules, setPhaseOpenRules] = useState<PhaseOpenRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -19,6 +20,7 @@ export default function AdminSettingsPage() {
       .then((r) => r.json())
       .then((data) => {
         setIntroText(data.introText ?? "");
+        setNoticeText(data.noticeText ?? "");
         setPhaseOpenRules(data.phaseOpenRules ?? []);
       })
       .finally(() => setLoading(false));
@@ -44,7 +46,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/event", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ introText, phaseOpenRules })
+        body: JSON.stringify({ introText, noticeText, phaseOpenRules })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -96,6 +98,24 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         )}
+
+        <label className="block text-sm">
+          <span className="mb-1 block font-bold text-ink">入場注意事項</span>
+          <span className="mb-2 block text-xs leading-5 text-muted">
+            顯示在「登記確認」頁面與確認信裡，純文字條列即可（例如「1. ……」換行接「2. ……」），換行會保留，不支援展覽介紹那套排版符號。
+          </span>
+          {loading ? (
+            <p className="text-sm text-muted">載入中…</p>
+          ) : (
+            <textarea
+              value={noticeText}
+              onChange={(e) => setNoticeText(e.target.value)}
+              rows={8}
+              maxLength={2000}
+              className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
+            />
+          )}
+        </label>
 
         <div>
           <span className="mb-1 block text-sm font-bold text-ink">分階段開放日期</span>

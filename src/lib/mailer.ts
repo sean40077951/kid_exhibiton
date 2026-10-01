@@ -25,42 +25,66 @@ function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
-function buildEmailHtml(p: ConfirmationEmailPayload): string {
-  const notice = p.noticeText.trim()
-    ? `<tr><td style="padding:16px 24px 24px;">
-         <table role="presentation" width="100%" style="background:#FFF8D6;border-radius:8px;">
-           <tr><td style="padding:14px 16px;font-size:13px;line-height:22px;color:#111827;white-space:pre-line;">${escapeHtml(p.noticeText)}</td></tr>
-         </table>
-       </td></tr>`
-    : "";
+// 業主提供的信件樣式參考稿（2026-10-01）：置中標題＋副標、左對齊內文、
+// 有格線的資訊表格、條列式入場注意事項、結尾署名與展覽地址。
+// 展覽地址目前沒有對應欄位，先寫死「待補」，業主確定地址後再改這裡。
+const VENUE_ADDRESS = "待補";
 
+function buildEmailHtml(p: ConfirmationEmailPayload): string {
   const row = (label: string, value: string) => `
     <tr>
-      <td style="padding:6px 0;font-size:13px;color:#6B7280;width:88px;">${label}</td>
-      <td style="padding:6px 0;font-size:14px;color:#111827;font-weight:bold;">${escapeHtml(value)}</td>
+      <td style="border:1px solid #E5E5E5;background:#F5F5F5;padding:10px 14px;font-size:13px;font-weight:bold;color:#111827;width:110px;">${escapeHtml(label)}</td>
+      <td style="border:1px solid #E5E5E5;padding:10px 14px;font-size:13px;color:#111827;">${escapeHtml(value)}</td>
     </tr>`;
+
+  const noticeLines = p.noticeText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((l) => `<li style="margin:0 0 6px;">${escapeHtml(l.replace(/^\d+[.、]\s*/, ""))}</li>`)
+    .join("");
+
+  const notice = noticeLines
+    ? `<tr><td style="padding:20px 32px 0;">
+         <p style="margin:0 0 8px;font-size:14px;font-weight:bold;color:#111827;">入場注意事項</p>
+         <ol style="margin:0;padding-left:20px;font-size:13px;line-height:22px;color:#374151;">${noticeLines}</ol>
+       </td></tr>`
+    : "";
 
   return `<!doctype html>
 <html lang="zh-Hant"><body style="margin:0;background:#F3F3F5;font-family:'PingFang TC','Microsoft JhengHei',sans-serif;">
 <table role="presentation" width="100%" style="background:#F3F3F5;padding:24px 0;">
   <tr><td align="center">
-    <table role="presentation" width="480" style="max-width:92%;background:#ffffff;border-radius:16px;overflow:hidden;">
-      <tr><td style="background:#EC1C8D;padding:20px 24px;">
-        <p style="margin:0;color:#ffffff;font-size:16px;font-weight:bold;">${escapeHtml(p.eventName)}</p>
-        <p style="margin:2px 0 0;color:#ffffff;font-size:13px;opacity:0.9;">體驗登記確認信</p>
+    <table role="presentation" width="560" style="max-width:92%;background:#ffffff;border-radius:8px;overflow:hidden;">
+      <tr><td style="padding:32px 32px 0;text-align:center;">
+        <p style="margin:0;font-size:22px;font-weight:bold;color:#111827;">${escapeHtml(p.eventName)}</p>
+        <p style="margin:6px 0 0;font-size:14px;font-weight:bold;color:#2F8F5B;">預約成功！您的確認信已送達</p>
       </td></tr>
-      <tr><td style="padding:24px 24px 8px;">
-        <p style="margin:0 0 4px;font-size:13px;color:#6B7280;">${escapeHtml(p.name)} 您好，您的登記已完成，資訊如下：</p>
-        <p style="margin:12px 0;padding:16px;background:#F5F5F5;border-radius:8px;text-align:center;font-size:22px;font-weight:bold;letter-spacing:0.1em;color:#111827;">${escapeHtml(p.bookingCode)}</p>
-        <table role="presentation" width="100%">
-          ${row("日期", p.dateStr)}
-          ${row("時段", p.timeSlot)}
-          ${row("人數", `${p.headcount} 人`)}
+      <tr><td style="padding:20px 32px 0;">
+        <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(p.name)} 您好：</p>
+        <p style="margin:8px 0 0;font-size:13px;line-height:22px;color:#374151;">
+          感謝您預約「${escapeHtml(p.eventName)}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。
+        </p>
+      </td></tr>
+      <tr><td style="padding:16px 32px 0;">
+        <table role="presentation" width="100%" style="border-collapse:collapse;">
+          ${row("預約編號", p.bookingCode)}
+          ${row("姓名", p.name)}
+          ${row("預約日期", p.dateStr)}
+          ${row("場次", p.timeSlot)}
+          ${row("預約人數", `${p.headcount} 人`)}
         </table>
       </td></tr>
       ${notice}
-      <tr><td style="padding:0 24px 24px;">
-        <p style="margin:0;font-size:12px;color:#9CA3AF;">此信件為系統自動寄送，請勿直接回覆。</p>
+      <tr><td style="padding:20px 32px 0;">
+        <p style="margin:0;font-size:13px;color:#374151;">若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。</p>
+      </td></tr>
+      <tr><td style="padding:16px 32px 24px;border-bottom:1px solid #E5E5E5;">
+        <p style="margin:0;font-size:13px;color:#111827;">${escapeHtml(p.eventName)} 敬上</p>
+        <p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;">展覽地址：${escapeHtml(VENUE_ADDRESS)}</p>
+      </td></tr>
+      <tr><td style="padding:16px 32px 24px;">
+        <p style="margin:0;font-size:12px;color:#9CA3AF;">※ 本信件由預約系統自動發送，請勿直接回覆。</p>
       </td></tr>
     </table>
   </td></tr>
@@ -69,15 +93,32 @@ function buildEmailHtml(p: ConfirmationEmailPayload): string {
 }
 
 function buildEmailText(p: ConfirmationEmailPayload): string {
+  const notice = p.noticeText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
   const lines = [
-    `${p.name} 您好，您的「${p.eventName}」體驗登記已完成。`,
+    `${p.name} 您好：`,
+    ``,
+    `感謝您預約「${p.eventName}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。`,
     ``,
     `預約編號：${p.bookingCode}`,
-    `日期：${p.dateStr}`,
-    `時段：${p.timeSlot}`,
-    `人數：${p.headcount} 人`
+    `姓名：${p.name}`,
+    `預約日期：${p.dateStr}`,
+    `場次：${p.timeSlot}`,
+    `預約人數：${p.headcount} 人`
   ];
-  if (p.noticeText.trim()) lines.push("", p.noticeText.trim());
+  if (notice.length) lines.push("", "入場注意事項", ...notice);
+  lines.push(
+    "",
+    "若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。",
+    "",
+    `${p.eventName} 敬上`,
+    `展覽地址：${VENUE_ADDRESS}`,
+    "",
+    "※ 本信件由預約系統自動發送，請勿直接回覆。"
+  );
   return lines.join("\n");
 }
 
@@ -98,7 +139,7 @@ export async function sendConfirmationEmail(payload: ConfirmationEmailPayload): 
     body: JSON.stringify({
       from,
       to: payload.to,
-      subject: `「${payload.eventName}」體驗登記確認｜${payload.bookingCode}`,
+      subject: `【${payload.eventName}】預約成功通知－預約編號 ${payload.bookingCode}`,
       html: buildEmailHtml(payload),
       text: buildEmailText(payload)
     }),
