@@ -13,13 +13,17 @@
 type ConfirmationEmailPayload = {
   to: string;
   name: string;
-  eventName: string;
   bookingCode: string;
   dateStr: string;
   timeSlot: string;
   headcount: number;
   noticeText: string;
 };
+
+// 確認信裡的品牌名稱固定寫死「怪獸放電場」（業主 2026-10-01 指示），
+// 不用資料庫的 event.name（那欄現在存的是比較長的展會描述「體驗登記系統｜兒藝節秋季展期」，
+// 用在前台頁面標題，跟信件品牌名稱是兩回事，所以不共用同一個值）。
+const BRAND_NAME = "怪獸放電場";
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -57,13 +61,13 @@ function buildEmailHtml(p: ConfirmationEmailPayload): string {
   <tr><td align="center">
     <table role="presentation" width="560" style="max-width:92%;background:#ffffff;border-radius:8px;overflow:hidden;">
       <tr><td style="padding:32px 32px 0;text-align:center;">
-        <p style="margin:0;font-size:22px;font-weight:bold;color:#111827;">${escapeHtml(p.eventName)}</p>
+        <p style="margin:0;font-size:22px;font-weight:bold;color:#111827;">${escapeHtml(BRAND_NAME)}</p>
         <p style="margin:6px 0 0;font-size:14px;font-weight:bold;color:#2F8F5B;">預約成功！您的確認信已送達</p>
       </td></tr>
       <tr><td style="padding:20px 32px 0;">
         <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(p.name)} 您好：</p>
         <p style="margin:8px 0 0;font-size:13px;line-height:22px;color:#374151;">
-          感謝您預約「${escapeHtml(p.eventName)}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。
+          感謝您預約「${escapeHtml(BRAND_NAME)}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。
         </p>
       </td></tr>
       <tr><td style="padding:16px 32px 0;">
@@ -80,7 +84,7 @@ function buildEmailHtml(p: ConfirmationEmailPayload): string {
         <p style="margin:0;font-size:13px;color:#374151;">若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。</p>
       </td></tr>
       <tr><td style="padding:16px 32px 24px;border-bottom:1px solid #E5E5E5;">
-        <p style="margin:0;font-size:13px;color:#111827;">${escapeHtml(p.eventName)} 敬上</p>
+        <p style="margin:0;font-size:13px;color:#111827;">${escapeHtml(BRAND_NAME)} 敬上</p>
         <p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;">展覽地址：${escapeHtml(VENUE_ADDRESS)}</p>
       </td></tr>
       <tr><td style="padding:16px 32px 24px;">
@@ -101,7 +105,7 @@ function buildEmailText(p: ConfirmationEmailPayload): string {
   const lines = [
     `${p.name} 您好：`,
     ``,
-    `感謝您預約「${p.eventName}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。`,
+    `感謝您預約「${BRAND_NAME}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。`,
     ``,
     `預約編號：${p.bookingCode}`,
     `姓名：${p.name}`,
@@ -114,7 +118,7 @@ function buildEmailText(p: ConfirmationEmailPayload): string {
     "",
     "若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。",
     "",
-    `${p.eventName} 敬上`,
+    `${BRAND_NAME} 敬上`,
     `展覽地址：${VENUE_ADDRESS}`,
     "",
     "※ 本信件由預約系統自動發送，請勿直接回覆。"
@@ -139,7 +143,7 @@ export async function sendConfirmationEmail(payload: ConfirmationEmailPayload): 
     body: JSON.stringify({
       from,
       to: payload.to,
-      subject: `【${payload.eventName}】預約成功通知－預約編號 ${payload.bookingCode}`,
+      subject: `【${BRAND_NAME}】預約成功通知－預約編號 ${payload.bookingCode}`,
       html: buildEmailHtml(payload),
       text: buildEmailText(payload)
     }),

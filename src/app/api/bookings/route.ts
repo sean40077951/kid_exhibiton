@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await prisma.session.findUnique({
       where: { id: input.sessionId },
-      include: { event: { select: { name: true, noticeText: true } } }
+      include: { event: { select: { noticeText: true } } }
     });
     if (!session) {
       return NextResponse.json({ error: "找不到此場次，請重新選擇" }, { status: 404 });
@@ -172,7 +172,6 @@ export async function POST(req: NextRequest) {
     sendConfirmationEmail({
       to: booking.email,
       name: booking.name,
-      eventName: session.event.name,
       bookingCode: booking.bookingCode,
       dateStr: formatDate(booking.bookingDate, "yyyy-MM-dd"),
       timeSlot: session.timeSlot,
