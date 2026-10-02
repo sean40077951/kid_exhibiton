@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
         if (existing > 0) {
           throw new BookingError(
             "DUPLICATE_EMAIL",
-            "今天您已登記過了"
+            "今天您已登記過了，如需協助請洽現場工作人員。"
           );
         }
       }
