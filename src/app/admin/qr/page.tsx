@@ -49,8 +49,8 @@ export default function AdminQrPage() {
     if (!info) return;
     const next = !info.gateEnabled;
     const msg = next
-      ? "確定要開啟嗎？開啟後，沒有掃過當天 QR Code 的人會看不到登記表單。"
-      : "確定要關閉嗎？關閉後任何人打開網址就能登記，不需要掃 QR Code。";
+      ? "確定要開啟正式模式嗎？開啟後：\n1. 沒有掃過當天 QR Code 的人會看不到登記表單\n2. 同一個 E-mail 一天只能登記一次"
+      : "確定要關閉嗎（改成測試模式）？關閉後：\n1. 任何人打開網址就能登記，不需要掃 QR Code\n2. 同一個 E-mail 可以重複登記，不限次數";
     if (!window.confirm(msg)) return;
     setToggling(true);
     setError(null);
@@ -112,9 +112,9 @@ export default function AdminQrPage() {
       <div className="rounded-eight border-[3px] border-ink bg-card p-4 shadow-hardsm">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-bold text-ink">要求掃 QR Code 才能登記</p>
+            <p className="text-sm font-bold text-ink">正式模式（掃 QR Code 才能登記，且每個 E-mail 一天限登記一次）</p>
             <p className="mt-1 text-xs text-muted">
-              {info?.gateEnabled ? "已開啟：沒掃 QR Code 的人看不到登記表單。" : "未開啟：目前任何人打開網址都可以登記。"}
+              {info?.gateEnabled ? "已開啟（正式模式）：沒掃 QR Code 的人看不到登記表單，同一個 E-mail 一天只能登記一次。" : "未開啟（測試模式）：任何人打開網址都能登記，同一個 E-mail 可以重複登記，方便測試。"}
             </p>
           </div>
           <button

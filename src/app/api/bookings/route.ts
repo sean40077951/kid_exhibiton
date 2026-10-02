@@ -4,7 +4,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { normalizeEmail, normalizePhone } from "@/lib/normalize";
 import { generateBookingCode } from "@/lib/booking-code";
-import { isBlockedByQrGate } from "@/lib/qr-pass";
+import { isBlockedByQrGate, isQrGateEnabled } from "@/lib/qr-pass";
 import { sendConfirmationEmail } from "@/lib/mailer";
 import { formatDate, isPastBookingCutoff, todayDateStringInTaipei } from "@/lib/timezone";
 
@@ -34,7 +34,7 @@ const bodySchema = z.object({
 });
 
 class BookingError extends Error {
-  code: "FULL" | "SESSION_NOT_FOUND" | "SESSION_CLOSED" | "PAST_CUTOFF";
+  code: "FULL" | "SESSION_NOT_FOUND" | "SESSION_CLOSED" | "PAST_CUTOFF" | "DUPLICATE_EMAIL";
   constructor(code: BookingError["code"], message: string) {
     super(message);
     this.code = code;
@@ -115,7 +115,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 「同一個 E-mail 當天只能登記一次」：業主 2026-10-02 要求加回來，但測試階段會被這條擋住不好開發，
+    // 所以跟 QR 門禁共用同一個後台開關——門禁開啟（正式模式）才限制，關閉（測試模式）不限制。
+    // 只能用應用層檢查、不能用資料庫唯一索引：這條規則要隨開關動態開關，硬性的唯一索引沒辦法跟著切換。
+    // 代價是兩個「完全同一瞬間」送出的相同信箱請求理論上有極小機率同時通過檢查，這個情境風險很低
+    // （是同一個人手滑連點，不是刻意繞過），先接受。已取消的預約不算次數，被後台取消後可以重新登記。
+    const enforceEmailLimit = await isQrGateEnabled();
+
     const booking = await prisma.$transaction(async (tx) => {
+      if (enforceEmailLimit) {
+        const existing = await tx.booking.count({
+          where: {
+            eventId: session.eventId,
+            bookingDate: session.date,
+            emailNormalized,
+            status: { not: "cancelled" }
+          }
+        });
+        if (existing > 0) {
+          throw new BookingError(
+            "DUPLICATE_EMAIL",
+            "這個 E-mail 今天已經登記過了，每個 E-mail 一天僅限登記一次。如需協助請洽現場工作人員。"
+          );
+        }
+      }
+
       // 原子扣減：單一 UPDATE + WHERE remaining >= headcount，
       // 影響列數為 0 代表名額不足，交由 catch 統一處理（見 PROJECT_SPEC.md 第 3.1 節）。
       const updated = await tx.session.updateMany({
@@ -151,8 +175,8 @@ export async function POST(req: NextRequest) {
             }
           });
         } catch (e) {
-          // 「每日每人限一次」去重已依業主指示取消（4-1），所以這裡唯一還可能撞到的
-          // 只剩 bookingCode 本身的唯一索引（極小機率的隨機碼碰撞），重試即可。
+          // 資料庫層唯一索引只剩 bookingCode 本身（極小機率的隨機碼碰撞），重試即可。
+          // E-mail 當天限一次的規則見上面 enforceEmailLimit，是應用層檢查，不是唯一索引。
           if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
             lastError = e;
             continue;
