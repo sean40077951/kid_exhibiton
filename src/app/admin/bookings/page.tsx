@@ -11,6 +11,8 @@ type BookingRow = {
   date: string;
   timeSlot: string;
   status: string;
+  emailStatus: string;
+  emailError: string | null;
   createdAt: string;
 };
 
@@ -22,6 +24,14 @@ const NEW_SLOTS = Array.from({ length: 24 }, (_, k) => {
 const OLD_SLOTS = ["10:00", "10:35", "11:10", "11:45", "13:30", "14:05", "14:40", "15:15", "15:50", "16:25"];
 const TIME_SLOTS = Array.from(new Set([...NEW_SLOTS, ...OLD_SLOTS])).sort();
 
+const EMAIL_LABEL: Record<string, { text: string; className: string }> = {
+  sent: { text: "已寄出", className: "text-green" },
+  failed: { text: "寄送失敗", className: "font-bold text-red" },
+  pending: { text: "寄送中／未確認", className: "text-muted" },
+  skipped: { text: "未寄出（寄信未啟用）", className: "font-bold text-red" },
+  unknown: { text: "—（舊資料）", className: "text-muted" }
+};
+
 const STATUS_LABEL: Record<string, string> = { confirmed: "已確認", pending: "處理中", cancelled: "已取消" };
 
 export default function AdminBookingsPage() {
@@ -32,6 +42,7 @@ export default function AdminBookingsPage() {
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // 打字時不要每個字都馬上打 API，停下來 400ms 後才真的送出查詢。
@@ -77,6 +88,26 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
       setError("網路異常，請稍後再試一次");
     } finally {
       setCancellingId(null);
+    }
+  }
+
+  async function resendEmail(r: BookingRow) {
+    if (!window.confirm(`要重寄確認信給 ${r.email} 嗎？`)) return;
+    setResendingId(r.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/bookings/${r.id}/resend-email`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "重寄失敗");
+        setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, emailStatus: "failed", emailError: data.error ?? null } : x)));
+        return;
+      }
+      setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, emailStatus: data.status, emailError: null } : x)));
+    } catch {
+      setError("網路異常，請稍後再試一次");
+    } finally {
+      setResendingId(null);
     }
   }
 
@@ -135,6 +166,7 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
               <Th>場次</Th>
               <Th>人數</Th>
               <Th>狀態</Th>
+              <Th>確認信</Th>
               <Th>預約時間戳記</Th>
             </tr>
           </thead>
@@ -142,6 +174,16 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
             {rows.map((r) => (
               <tr key={r.id} className={`border-t border-line ${r.status === "cancelled" ? "opacity-50" : ""}`}>
                 <Td>
+                  {r.status !== "cancelled" && (
+                    <button
+                      type="button"
+                      onClick={() => resendEmail(r)}
+                      disabled={resendingId === r.id}
+                      className="mr-1 rounded-eight border-2 border-ink px-2 py-0.5 text-xs font-bold text-ink hover:bg-line/40 disabled:opacity-40"
+                    >
+                      {resendingId === r.id ? "寄送中…" : "重寄確認信"}
+                    </button>
+                  )}
                   {r.status !== "cancelled" && (
                     <button
                       type="button"
@@ -161,6 +203,14 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
                 <Td>{r.headcount}</Td>
                 <Td>{STATUS_LABEL[r.status] ?? r.status}</Td>
                 <Td>
+                  <span
+                    className={(EMAIL_LABEL[r.emailStatus] ?? EMAIL_LABEL.unknown).className}
+                    title={r.emailError ?? undefined}
+                  >
+                    {(EMAIL_LABEL[r.emailStatus] ?? EMAIL_LABEL.unknown).text}
+                  </span>
+                </Td>
+                <Td>
                   {new Date(r.createdAt).toLocaleString("zh-TW", {
                     timeZone: "Asia/Taipei",
                     year: "numeric",
@@ -176,7 +226,7 @@ ${r.date} ${r.timeSlot}　${r.headcount} 人
             ))}
             {!loading && rows.length === 0 && (
               <tr>
-                <td colSpan={9} className="p-4 text-center text-muted">
+                <td colSpan={10} className="p-4 text-center text-muted">
                   沒有符合條件的預約
                 </td>
               </tr>

@@ -31,6 +31,9 @@ export async function GET(req: NextRequest) {
       date: formatDate(b.bookingDate, "yyyy-MM-dd"),
       timeSlot: b.session.timeSlot,
       status: b.status,
+      emailStatus: b.emailStatus,
+      emailSentAt: b.emailSentAt,
+      emailError: b.emailError,
       createdAt: b.createdAt
     }))
   });

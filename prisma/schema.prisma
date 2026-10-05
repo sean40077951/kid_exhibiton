@@ -95,6 +95,13 @@ model Booking {
 
   reminderSentAt DateTime? // 前一日提醒信是否已寄送，防止排程重複寄送
 
+  // 確認信寄送狀態（後台預約查詢顯示，寄失敗時可手動重寄）：
+  //   unknown＝加這個欄位之前的舊預約（不知道有沒有寄）／pending＝剛建立、還沒確認寄出
+  //   sent＝Resend 已接受寄送／failed＝寄送失敗（原因見 emailError）／skipped＝沒設定 API Key，只做了模擬
+  emailStatus String    @default("unknown")
+  emailSentAt DateTime?
+  emailError  String?
+
   createdAt DateTime @default(now())
 
   // 「每日每人限一次」去重規則已依業主指示取消（見對業主須知回覆 4-1），全面開放，

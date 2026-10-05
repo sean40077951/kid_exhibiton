@@ -5,8 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { normalizeEmail, normalizePhone } from "@/lib/normalize";
 import { generateBookingCode } from "@/lib/booking-code";
 import { isBlockedByQrGate, isQrGateEnabled } from "@/lib/qr-pass";
-import { sendConfirmationEmail } from "@/lib/mailer";
-import { cancelUrlFor } from "@/lib/cancel-token";
+import { sendBookingConfirmation } from "@/lib/booking-email";
 import { formatDate, isPastBookingCutoff, todayDateStringInTaipei } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
@@ -93,10 +92,7 @@ export async function POST(req: NextRequest) {
   const phoneNormalized = normalizePhone(input.phone);
 
   try {
-    const session = await prisma.session.findUnique({
-      where: { id: input.sessionId },
-      include: { event: { select: { noticeText: true } } }
-    });
+    const session = await prisma.session.findUnique({ where: { id: input.sessionId } });
     if (!session) {
       return NextResponse.json({ error: "找不到此場次，請重新選擇" }, { status: 404 });
     }
@@ -172,6 +168,7 @@ export async function POST(req: NextRequest) {
               consentGivenAt,
               consentVersion: "v1",
               status: "confirmed",
+              emailStatus: "pending",
               bookingDate: session.date
             }
           });
@@ -194,16 +191,9 @@ export async function POST(req: NextRequest) {
       timeout: 10000
     });
 
-    sendConfirmationEmail({
-      to: booking.email,
-      name: booking.name,
-      bookingCode: booking.bookingCode,
-      dateStr: formatDate(booking.bookingDate, "yyyy-MM-dd"),
-      timeSlot: session.timeSlot,
-      headcount: booking.headcount,
-      noticeText: session.event.noticeText,
-      cancelUrl: cancelUrlFor(booking.id)
-    }).catch((e) => console.error("[mailer] 確認信寄送失敗", e));
+    // 不等待寄信結果（民眾不用等寄信時間）；結果與失敗原因由 sendBookingConfirmation 寫回預約紀錄，
+    // 後台預約查詢看得到狀態、寄失敗時可以手動重寄。
+    void sendBookingConfirmation(booking.id);
 
     return NextResponse.json({
       bookingCode: booking.bookingCode,

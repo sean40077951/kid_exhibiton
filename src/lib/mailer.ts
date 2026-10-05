@@ -135,7 +135,18 @@ function buildEmailText(p: ConfirmationEmailPayload): string {
   return lines.join("\n");
 }
 
-export async function sendConfirmationEmail(payload: ConfirmationEmailPayload): Promise<void> {
+// 寄信失敗的錯誤，帶 HTTP 狀態碼（網路層錯誤沒有狀態碼），讓呼叫端判斷值不值得重試。
+export class MailError extends Error {
+  constructor(
+    message: string,
+    public status?: number
+  ) {
+    super(message);
+  }
+}
+
+// 回傳 "sent"＝Resend 已接受；"skipped"＝沒設定 API Key，只做了模擬（沒有真的寄出）。
+export async function sendConfirmationEmail(payload: ConfirmationEmailPayload): Promise<"sent" | "skipped"> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.MAIL_FROM || "noreply@example.com";
 
@@ -143,7 +154,7 @@ export async function sendConfirmationEmail(payload: ConfirmationEmailPayload): 
     console.warn(
       `[mailer] RESEND_API_KEY 未設定，僅模擬寄送確認信給 ${payload.to}（預約編號 ${payload.bookingCode}）`
     );
-    return;
+    return "skipped";
   }
 
   const res = await fetch("https://api.resend.com/emails", {
@@ -161,6 +172,7 @@ export async function sendConfirmationEmail(payload: ConfirmationEmailPayload): 
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`[mailer] Resend 回傳失敗 ${res.status}：${body.slice(0, 300)}`);
+    throw new MailError(`Resend 回傳失敗 ${res.status}：${body.slice(0, 300)}`, res.status);
   }
+  return "sent";
 }
