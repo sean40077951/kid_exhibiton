@@ -9,6 +9,7 @@ const TABS = [
   { href: "/admin/sessions", label: "場次管理" },
   { href: "/admin/preview", label: "前台預覽" },
   { href: "/admin/qr", label: "現場 QR" },
+  { href: "/admin/stats", label: "統計報表" },
   { href: "/admin/export", label: "資料匯出" },
   { href: "/admin/backups", label: "資料備份" },
   { href: "/admin/settings", label: "活動設定" }
