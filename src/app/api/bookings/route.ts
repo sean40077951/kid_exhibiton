@@ -6,6 +6,7 @@ import { normalizeEmail, normalizePhone } from "@/lib/normalize";
 import { generateBookingCode } from "@/lib/booking-code";
 import { isBlockedByQrGate, isQrGateEnabled } from "@/lib/qr-pass";
 import { sendConfirmationEmail } from "@/lib/mailer";
+import { cancelUrlFor } from "@/lib/cancel-token";
 import { formatDate, isPastBookingCutoff, todayDateStringInTaipei } from "@/lib/timezone";
 
 export const dynamic = "force-dynamic";
@@ -200,7 +201,8 @@ export async function POST(req: NextRequest) {
       dateStr: formatDate(booking.bookingDate, "yyyy-MM-dd"),
       timeSlot: session.timeSlot,
       headcount: booking.headcount,
-      noticeText: session.event.noticeText
+      noticeText: session.event.noticeText,
+      cancelUrl: cancelUrlFor(booking.id)
     }).catch((e) => console.error("[mailer] 確認信寄送失敗", e));
 
     return NextResponse.json({

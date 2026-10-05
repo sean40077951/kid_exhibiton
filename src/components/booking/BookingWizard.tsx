@@ -149,7 +149,7 @@ function IntroPanel({ eventName, introText }: { eventName: string; introText: st
 // 頁首：浮在花瓣邊框上的白色圓角小框（左，放「怪獸放電場 PLAY TOGETHER!」標題圖），政府合作 logo 放在右上角白色方塊。
 // 參考稿小框裡還有「競技場介紹／選手登入」等選單，系統沒有對應頁面，不放。
 // 手機版照參考稿改成整條白色橫條，logo 收在橫條右側。
-function SiteHeader() {
+export function SiteHeader() {
   return (
     <header className="relative flex items-start justify-between px-4 pt-4">
       <div className="flex w-full items-center gap-3 rounded-2xl bg-white py-1.5 pl-4 pr-2 shadow-softsm md:w-auto md:py-2 md:pr-6">
@@ -165,7 +165,7 @@ function SiteHeader() {
 
 // 頁尾：業主第二版素材包改成玫瑰粉色底、白字，版權文字靠左。
 // 參考稿右側的隱私政策等連結系統沒有對應頁面，不放。
-function Footer() {
+export function Footer() {
   return (
     <footer className="bg-[#C5707D] px-5 py-6 text-sm font-bold text-white md:px-[4%]">
       © {new Date().getFullYear()} 體驗登記系統. All rights reserved.
@@ -207,7 +207,7 @@ const M_SIDE_W = 120; // edge-left/right、corner 寬
 const M_TOP_H = 132; // corner-tl/tr、edge-top 高（361 × 120 / 329）
 const M_BOTTOM_H = 131; // corner-bl/br、edge-bottom 高（360 × 120 / 329）
 
-function MobileFrameBackground() {
+export function MobileFrameBackground() {
   const strip = (src: string, style: React.CSSProperties, size: string, repeat: string) => (
     <div
       className="absolute"
@@ -231,7 +231,7 @@ function MobileFrameBackground() {
   );
 }
 
-function FrameBackground() {
+export function FrameBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 hidden overflow-hidden md:block" aria-hidden="true">
       {FRAME_PIECES.map((p, i) => (

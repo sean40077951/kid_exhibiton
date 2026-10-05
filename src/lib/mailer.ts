@@ -18,6 +18,8 @@ type ConfirmationEmailPayload = {
   timeSlot: string;
   headcount: number;
   noticeText: string;
+  // 確認信裡「取消預約」按鈕的連結（見 src/lib/cancel-token.ts）。
+  cancelUrl: string;
 };
 
 // 確認信裡的品牌名稱固定寫死「怪獸放電場」（業主 2026-10-01 指示），
@@ -80,6 +82,10 @@ function buildEmailHtml(p: ConfirmationEmailPayload): string {
         </table>
       </td></tr>
       ${notice}
+      <tr><td style="padding:24px 32px 0;text-align:center;">
+        <a href="${escapeHtml(p.cancelUrl)}" style="display:inline-block;padding:12px 32px;border-radius:999px;background:#EC1C8D;color:#ffffff;font-size:14px;font-weight:bold;text-decoration:none;">取消預約</a>
+        <p style="margin:8px 0 0;font-size:12px;color:#9CA3AF;">如需取消，請於場次開始前 1 小時按上方按鈕辦理</p>
+      </td></tr>
       <tr><td style="padding:20px 32px 0;">
         <p style="margin:0;font-size:13px;color:#374151;">若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。</p>
       </td></tr>
@@ -115,6 +121,9 @@ function buildEmailText(p: ConfirmationEmailPayload): string {
   ];
   if (notice.length) lines.push("", "入場注意事項", ...notice);
   lines.push(
+    "",
+    "如需取消預約，請於場次開始前 1 小時，點選下方連結辦理：",
+    p.cancelUrl,
     "",
     "若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。",
     "",

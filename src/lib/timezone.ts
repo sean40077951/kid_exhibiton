@@ -30,3 +30,13 @@ export function isPastBookingCutoff(sessionDate: Date, timeSlot: string, now: Da
   const cutoff = new Date(sessionStart.getTime() - BOOKING_CUTOFF_MINUTES * 60 * 1000);
   return now >= cutoff;
 }
+
+// 使用者自助取消：場次開始前 60 分鐘內不能再取消（參考稿「如需取消，請於 1 小時前取消登記」）。
+export const USER_CANCEL_CUTOFF_MINUTES = 60;
+
+export function isPastCancelCutoff(sessionDate: Date, timeSlot: string, now: Date = new Date()): boolean {
+  const dateStr = formatDate(sessionDate, "yyyy-MM-dd");
+  const sessionStart = new Date(`${dateStr}T${timeSlot}:00+08:00`);
+  const cutoff = new Date(sessionStart.getTime() - USER_CANCEL_CUTOFF_MINUTES * 60 * 1000);
+  return now >= cutoff;
+}

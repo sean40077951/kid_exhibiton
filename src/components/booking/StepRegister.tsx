@@ -316,7 +316,7 @@ function TermsModal({ consentText, onClose }: { consentText: string; onClose: ()
       >
         <p className="mb-3 text-base font-bold text-ink">體驗安全須知</p>
         <p className="text-sm leading-7 text-ink">
-          送出後不能取消或修改，請確認人數與時段無誤再送出；請於體驗時間前 10 分鐘到場報到，逾時不候。
+          送出後無法修改；如需取消，請於場次開始前 1 小時，透過確認信裡的「取消預約」按鈕辦理。請確認人數與時段無誤再送出；請於體驗時間前 10 分鐘到場報到，逾時不候。
         </p>
         {consentText && (
           <>
