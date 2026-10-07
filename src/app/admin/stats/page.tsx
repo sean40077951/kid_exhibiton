@@ -233,9 +233,6 @@ export default function AdminStatsPage() {
         </table>
       </div>
 
-      <p className="mt-3 text-xs leading-6 text-muted">
-        登記人次＝未取消預約的人數加總（一筆預約 3 人算 3 人次）；預約率＝登記人次 ÷ 計入名額。計入名額的場次是「開放中」，或「已關閉但已有人登記」的場次；沒人登記又被關閉的場次（例如臨時休館）不計入名額，才不會把預約率拉低。點日期可展開各場次。
-      </p>
     </main>
   );
 }
