@@ -18,7 +18,7 @@ function isRetryable(e: unknown): boolean {
 export async function sendBookingConfirmation(bookingId: string): Promise<{ status: "sent" | "failed" | "skipped"; error?: string }> {
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
-    include: { session: { include: { event: { select: { noticeText: true } } } } }
+    include: { session: { include: { event: { select: { noticeText: true, venueAddress: true } } } } }
   });
   if (!booking) return { status: "failed", error: "找不到這筆預約" };
 
@@ -30,6 +30,7 @@ export async function sendBookingConfirmation(bookingId: string): Promise<{ stat
     timeSlot: booking.session.timeSlot,
     headcount: booking.headcount,
     noticeText: booking.session.event.noticeText,
+    venueAddress: booking.session.event.venueAddress,
     cancelUrl: cancelUrlFor(booking.id)
   };
 

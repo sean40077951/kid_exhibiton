@@ -16,6 +16,7 @@ export async function GET() {
     id: event.id,
     introText: event.introText,
     noticeText: event.noticeText,
+    venueAddress: event.venueAddress,
     phaseOpenRules: event.phaseOpenRules as PhaseOpenRule[]
   });
 }
@@ -24,6 +25,7 @@ const bodySchema = z.object({
   introText: z.string().max(1000, "展覽介紹文字太長，請控制在 1000 字以內"),
   // 入場注意事項：顯示在登記確認頁與確認信裡，內容通常是編號條列，給長一點的上限。
   noticeText: z.string().max(2000, "入場注意事項文字太長，請控制在 2000 字以內"),
+  venueAddress: z.string().trim().max(200, "展覽地址太長，請控制在 200 字以內"),
   phaseOpenRules: z
     .array(
       z.object({
@@ -56,6 +58,7 @@ export async function PATCH(req: NextRequest) {
     data: {
       introText: parsed.data.introText,
       noticeText: parsed.data.noticeText,
+      venueAddress: parsed.data.venueAddress,
       phaseOpenRules: parsed.data.phaseOpenRules
     }
   });
@@ -64,6 +67,7 @@ export async function PATCH(req: NextRequest) {
     id: updated.id,
     introText: updated.introText,
     noticeText: updated.noticeText,
+    venueAddress: updated.venueAddress,
     phaseOpenRules: updated.phaseOpenRules as PhaseOpenRule[]
   });
 }

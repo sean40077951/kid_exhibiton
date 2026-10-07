@@ -9,6 +9,7 @@ type PhaseOpenRule = { openDate: string; appliesToMonth: string };
 export default function AdminSettingsPage() {
   const [introText, setIntroText] = useState("");
   const [noticeText, setNoticeText] = useState("");
+  const [venueAddress, setVenueAddress] = useState("");
   const [phaseOpenRules, setPhaseOpenRules] = useState<PhaseOpenRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,6 +22,7 @@ export default function AdminSettingsPage() {
       .then((data) => {
         setIntroText(data.introText ?? "");
         setNoticeText(data.noticeText ?? "");
+        setVenueAddress(data.venueAddress ?? "");
         setPhaseOpenRules(data.phaseOpenRules ?? []);
       })
       .finally(() => setLoading(false));
@@ -46,7 +48,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/event", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ introText, noticeText, phaseOpenRules })
+        body: JSON.stringify({ introText, noticeText, venueAddress, phaseOpenRules })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -112,6 +114,25 @@ export default function AdminSettingsPage() {
               onChange={(e) => setNoticeText(e.target.value)}
               rows={8}
               maxLength={2000}
+              className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
+            />
+          )}
+        </label>
+
+        <label className="block text-sm">
+          <span className="mb-1 block font-bold text-ink">展覽地址</span>
+          <span className="mb-2 block text-xs leading-5 text-muted">
+            顯示在確認信結尾的「展覽地址：……」。留空的話，信裡就不會出現這一行。
+          </span>
+          {loading ? (
+            <p className="text-sm text-muted">載入中…</p>
+          ) : (
+            <input
+              type="text"
+              value={venueAddress}
+              onChange={(e) => setVenueAddress(e.target.value)}
+              maxLength={200}
+              placeholder="例如：新北市三重區○○路○號 5 樓"
               className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
             />
           )}

@@ -18,6 +18,8 @@ type ConfirmationEmailPayload = {
   timeSlot: string;
   headcount: number;
   noticeText: string;
+  // 展覽地址（後台「活動設定」可改），空白就不顯示那一行。
+  venueAddress: string;
   // 確認信裡「取消預約」按鈕的連結（見 src/lib/cancel-token.ts）。
   cancelUrl: string;
 };
@@ -32,9 +34,7 @@ function escapeHtml(s: string): string {
 }
 
 // 業主提供的信件樣式參考稿（2026-10-01）：置中標題＋副標、左對齊內文、
-// 有格線的資訊表格、條列式入場注意事項、結尾署名與展覽地址。
-// 展覽地址目前沒有對應欄位，先寫死「待補」，業主確定地址後再改這裡。
-const VENUE_ADDRESS = "待補";
+// 有格線的資訊表格、條列式入場注意事項、結尾署名與展覽地址（地址由後台設定）。
 
 function buildEmailHtml(p: ConfirmationEmailPayload): string {
   const row = (label: string, value: string) => `
@@ -91,7 +91,7 @@ function buildEmailHtml(p: ConfirmationEmailPayload): string {
       </td></tr>
       <tr><td style="padding:16px 32px 24px;border-bottom:1px solid #E5E5E5;">
         <p style="margin:0;font-size:13px;color:#111827;">${escapeHtml(BRAND_NAME)} 敬上</p>
-        <p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;">展覽地址：${escapeHtml(VENUE_ADDRESS)}</p>
+        ${p.venueAddress ? `<p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;">展覽地址：${escapeHtml(p.venueAddress)}</p>` : ""}
       </td></tr>
       <tr><td style="padding:16px 32px 24px;">
         <p style="margin:0;font-size:12px;color:#9CA3AF;">※ 本信件由預約系統自動發送，請勿直接回覆。</p>
@@ -128,7 +128,7 @@ function buildEmailText(p: ConfirmationEmailPayload): string {
     "若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。",
     "",
     `${BRAND_NAME} 敬上`,
-    `展覽地址：${VENUE_ADDRESS}`,
+    ...(p.venueAddress ? [`展覽地址：${p.venueAddress}`] : []),
     "",
     "※ 本信件由預約系統自動發送，請勿直接回覆。"
   );

@@ -20,6 +20,7 @@ model Event {
   bannerText        String   @default("")
   introText         String   @default("") // 展覽介紹描述（業主提供「體驗登記系統」Figma 參考稿左欄文字，含開放時間／地點）
   noticeText        String   @default("")
+  venueAddress      String   @default("") // 展覽地址，顯示在確認信結尾（後台「活動設定」可改，空白就不顯示）
   emailTemplate     String   @default("")
   consentText       String   @default("")
   consentVersion    String   @default("v1")
