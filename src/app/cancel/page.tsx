@@ -97,7 +97,7 @@ function CancelContent() {
         <div className="space-y-2">
           {[
             ["預約編號", info.bookingCode],
-            ["姓名", info.name],
+            ["暱稱", info.name],
             ["日期", info.date.replace(/-/g, "/")],
             ["時段", info.timeSlot],
             ["人數", `${info.headcount} 人`]

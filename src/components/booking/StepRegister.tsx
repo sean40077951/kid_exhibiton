@@ -142,8 +142,8 @@ export default function StepRegister({
       </Section>
 
       <Section title="體驗人數">
-        <div className="grid grid-cols-5 gap-2">
-          {[1, 2, 3, 4, 5].map((n) => (
+        <div className="grid grid-cols-4 gap-2">
+          {[1, 2, 3, 4].map((n) => (
             <button
               key={n}
               type="button"
@@ -219,12 +219,12 @@ export default function StepRegister({
 
       <Section title="登記資料">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="姓名">
+          <Field label="暱稱">
             <input
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="請輸入姓名"
+              placeholder="請輸入暱稱"
               className={INPUT}
             />
           </Field>

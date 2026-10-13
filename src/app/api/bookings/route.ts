@@ -13,9 +13,9 @@ export const dynamic = "force-dynamic";
 const bodySchema = z.object({
   sessionId: z.string({ required_error: "缺少場次資訊，請重新選擇" }).min(1, "缺少場次資訊，請重新選擇"),
   name: z
-    .string({ required_error: "請填寫姓名" })
+    .string({ required_error: "請填寫暱稱" })
     .trim()
-    .min(1, "請填寫姓名"),
+    .min(1, "請填寫暱稱"),
   // 業主取消收集聯絡電話；資料庫欄位仍是必填字串，所以沒帶就存空字串。
   phone: z.string().trim().default(""),
   email: z
@@ -26,7 +26,7 @@ const bodySchema = z.object({
     .number({ required_error: "請選擇預約人數", invalid_type_error: "請選擇預約人數" })
     .int()
     .min(1, "預約人數至少 1 人")
-    .max(5, "預約人數最多 5 人"),
+    .max(4, "預約人數最多 4 人"),
   consent: z.literal(true, { errorMap: () => ({ message: "請勾選同意個資使用聲明" }) }),
   turnstileToken: z.string().optional(),
   // Honeypot：一般使用者看不到、不會填寫的欄位，機器人常會誤填。

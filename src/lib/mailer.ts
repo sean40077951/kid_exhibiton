@@ -75,7 +75,7 @@ function buildEmailHtml(p: ConfirmationEmailPayload): string {
       <tr><td style="padding:16px 32px 0;">
         <table role="presentation" width="100%" style="border-collapse:collapse;">
           ${row("預約編號", p.bookingCode)}
-          ${row("姓名", p.name)}
+          ${row("暱稱", p.name)}
           ${row("預約日期", p.dateStr)}
           ${row("場次", p.timeSlot)}
           ${row("預約人數", `${p.headcount} 人`)}
@@ -114,7 +114,7 @@ function buildEmailText(p: ConfirmationEmailPayload): string {
     `感謝您預約「${BRAND_NAME}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。`,
     ``,
     `預約編號：${p.bookingCode}`,
-    `姓名：${p.name}`,
+    `暱稱：${p.name}`,
     `預約日期：${p.dateStr}`,
     `場次：${p.timeSlot}`,
     `預約人數：${p.headcount} 人`

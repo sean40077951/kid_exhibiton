@@ -24,7 +24,7 @@ export default function StepSuccess({
       <div>
         <p className="mb-2.5 text-sm font-bold text-ink">登記資訊</p>
         <div className="space-y-2">
-          <InfoRow icon="person" label="姓名" value={result.name} />
+          <InfoRow icon="person" label="暱稱" value={result.name} />
           <InfoRow icon="mail" label="E-mail" value={result.email} />
           <InfoRow icon="calendar" label="日期" value={result.date} />
           <InfoRow icon="clock" label="時段" value={result.timeSlot} />
