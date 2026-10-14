@@ -64,37 +64,37 @@ function buildEmailHtml(p: ConfirmationEmailPayload): string {
     <table role="presentation" width="560" style="max-width:92%;background:#ffffff;border-radius:8px;overflow:hidden;">
       <tr><td style="padding:32px 32px 0;text-align:center;">
         <p style="margin:0;font-size:22px;font-weight:bold;color:#111827;">${escapeHtml(BRAND_NAME)}</p>
-        <p style="margin:6px 0 0;font-size:14px;font-weight:bold;color:#2F8F5B;">預約成功！您的確認信已送達</p>
+        <p style="margin:6px 0 0;font-size:14px;font-weight:bold;color:#2F8F5B;">登記成功！您的確認信已送達</p>
       </td></tr>
       <tr><td style="padding:20px 32px 0;">
         <p style="margin:0;font-size:14px;color:#111827;">${escapeHtml(p.name)} 您好：</p>
         <p style="margin:8px 0 0;font-size:13px;line-height:22px;color:#374151;">
-          感謝您預約「${escapeHtml(BRAND_NAME)}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。
+          感謝您登記「${escapeHtml(BRAND_NAME)}」，本次登記已完成，以下為您的登記資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。
         </p>
       </td></tr>
       <tr><td style="padding:16px 32px 0;">
         <table role="presentation" width="100%" style="border-collapse:collapse;">
-          ${row("預約編號", p.bookingCode)}
+          ${row("登記編號", p.bookingCode)}
           ${row("暱稱", p.name)}
-          ${row("預約日期", p.dateStr)}
+          ${row("登記日期", p.dateStr)}
           ${row("場次", p.timeSlot)}
-          ${row("預約人數", `${p.headcount} 人`)}
+          ${row("登記人數", `${p.headcount} 人`)}
         </table>
       </td></tr>
       ${notice}
       <tr><td style="padding:24px 32px 0;text-align:center;">
-        <a href="${escapeHtml(p.cancelUrl)}" style="display:inline-block;padding:12px 32px;border-radius:999px;background:#EC1C8D;color:#ffffff;font-size:14px;font-weight:bold;text-decoration:none;">取消預約</a>
+        <a href="${escapeHtml(p.cancelUrl)}" style="display:inline-block;padding:12px 32px;border-radius:999px;background:#EC1C8D;color:#ffffff;font-size:14px;font-weight:bold;text-decoration:none;">取消登記</a>
         <p style="margin:8px 0 0;font-size:12px;color:#9CA3AF;">如需取消，請於場次開始前 1 小時按上方按鈕辦理</p>
       </td></tr>
       <tr><td style="padding:20px 32px 0;">
-        <p style="margin:0;font-size:13px;color:#374151;">若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。</p>
+        <p style="margin:0;font-size:13px;color:#374151;">若對本次登記有任何疑問，歡迎於活動現場洽詢工作人員。</p>
       </td></tr>
       <tr><td style="padding:16px 32px 24px;border-bottom:1px solid #E5E5E5;">
         <p style="margin:0;font-size:13px;color:#111827;">${escapeHtml(BRAND_NAME)} 敬上</p>
         ${p.venueAddress ? `<p style="margin:2px 0 0;font-size:12px;color:#9CA3AF;">展覽地址：${escapeHtml(p.venueAddress)}</p>` : ""}
       </td></tr>
       <tr><td style="padding:16px 32px 24px;">
-        <p style="margin:0;font-size:12px;color:#9CA3AF;">※ 本信件由預約系統自動發送，請勿直接回覆。</p>
+        <p style="margin:0;font-size:12px;color:#9CA3AF;">※ 本信件由登記系統自動發送，請勿直接回覆。</p>
       </td></tr>
     </table>
   </td></tr>
@@ -111,26 +111,26 @@ function buildEmailText(p: ConfirmationEmailPayload): string {
   const lines = [
     `${p.name} 您好：`,
     ``,
-    `感謝您預約「${BRAND_NAME}」，本次預約已完成，以下為您的預約資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。`,
+    `感謝您登記「${BRAND_NAME}」，本次登記已完成，以下為您的登記資訊，請妥善保存本封信件，並於活動當日出示以利入場核對。`,
     ``,
-    `預約編號：${p.bookingCode}`,
+    `登記編號：${p.bookingCode}`,
     `暱稱：${p.name}`,
-    `預約日期：${p.dateStr}`,
+    `登記日期：${p.dateStr}`,
     `場次：${p.timeSlot}`,
-    `預約人數：${p.headcount} 人`
+    `登記人數：${p.headcount} 人`
   ];
   if (notice.length) lines.push("", "入場注意事項", ...notice);
   lines.push(
     "",
-    "如需取消預約，請於場次開始前 1 小時，點選下方連結辦理：",
+    "如需取消登記，請於場次開始前 1 小時，點選下方連結辦理：",
     p.cancelUrl,
     "",
-    "若對本次預約有任何疑問，歡迎於活動現場洽詢工作人員。",
+    "若對本次登記有任何疑問，歡迎於活動現場洽詢工作人員。",
     "",
     `${BRAND_NAME} 敬上`,
     ...(p.venueAddress ? [`展覽地址：${p.venueAddress}`] : []),
     "",
-    "※ 本信件由預約系統自動發送，請勿直接回覆。"
+    "※ 本信件由登記系統自動發送，請勿直接回覆。"
   );
   return lines.join("\n");
 }
@@ -163,7 +163,7 @@ export async function sendConfirmationEmail(payload: ConfirmationEmailPayload): 
     body: JSON.stringify({
       from,
       to: payload.to,
-      subject: `【${BRAND_NAME}】預約成功通知－預約編號 ${payload.bookingCode}`,
+      subject: `【${BRAND_NAME}】登記成功通知－登記編號 ${payload.bookingCode}`,
       html: buildEmailHtml(payload),
       text: buildEmailText(payload)
     }),
