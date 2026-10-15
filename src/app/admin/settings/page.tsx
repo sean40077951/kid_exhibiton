@@ -9,6 +9,7 @@ type PhaseOpenRule = { openDate: string; appliesToMonth: string };
 export default function AdminSettingsPage() {
   const [introText, setIntroText] = useState("");
   const [noticeText, setNoticeText] = useState("");
+  const [emailNoticeText, setEmailNoticeText] = useState("");
   const [venueAddress, setVenueAddress] = useState("");
   const [phaseOpenRules, setPhaseOpenRules] = useState<PhaseOpenRule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ export default function AdminSettingsPage() {
       .then((data) => {
         setIntroText(data.introText ?? "");
         setNoticeText(data.noticeText ?? "");
+        setEmailNoticeText(data.emailNoticeText ?? "");
         setVenueAddress(data.venueAddress ?? "");
         setPhaseOpenRules(data.phaseOpenRules ?? []);
       })
@@ -48,7 +50,7 @@ export default function AdminSettingsPage() {
       const res = await fetch("/api/admin/event", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ introText, noticeText, venueAddress, phaseOpenRules })
+        body: JSON.stringify({ introText, noticeText, emailNoticeText, venueAddress, phaseOpenRules })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -102,9 +104,9 @@ export default function AdminSettingsPage() {
         )}
 
         <label className="block text-sm">
-          <span className="mb-1 block font-bold text-ink">入場注意事項</span>
+          <span className="mb-1 block font-bold text-ink">重要提醒（登記完成頁）</span>
           <span className="mb-2 block text-xs leading-5 text-muted">
-            顯示在「登記確認」頁面與確認信裡，純文字條列即可（例如「1. ……」換行接「2. ……」），換行會保留，不支援展覽介紹那套排版符號。
+            顯示在前台「登記完成」頁面的黃底「重要提醒」區塊。純文字條列即可（例如「1. ……」換行接「2. ……」），換行會保留，不支援展覽介紹那套排版符號。
           </span>
           {loading ? (
             <p className="text-sm text-muted">載入中…</p>
@@ -112,6 +114,24 @@ export default function AdminSettingsPage() {
             <textarea
               value={noticeText}
               onChange={(e) => setNoticeText(e.target.value)}
+              rows={8}
+              maxLength={2000}
+              className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
+            />
+          )}
+        </label>
+
+        <label className="block text-sm">
+          <span className="mb-1 block font-bold text-ink">確認信入場注意事項</span>
+          <span className="mb-2 block text-xs leading-5 text-muted">
+            顯示在寄給民眾的確認信裡「入場注意事項」區塊，與上面的「重要提醒」各自獨立、互不影響。純文字條列即可，換行會保留。
+          </span>
+          {loading ? (
+            <p className="text-sm text-muted">載入中…</p>
+          ) : (
+            <textarea
+              value={emailNoticeText}
+              onChange={(e) => setEmailNoticeText(e.target.value)}
               rows={8}
               maxLength={2000}
               className="w-full rounded-eight border-2 border-ink bg-card px-3 py-2 focus:border-[3px] focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/30"
