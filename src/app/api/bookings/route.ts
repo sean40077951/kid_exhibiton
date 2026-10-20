@@ -41,6 +41,14 @@ class BookingError extends Error {
   }
 }
 
+// 是不是「預約編號重複」造成的唯一索引錯誤（其他欄位的唯一索引錯誤不該被當成撞號重試）。
+function isBookingCodeCollision(e: unknown): boolean {
+  if (!(e instanceof Prisma.PrismaClientKnownRequestError) || e.code !== "P2002") return false;
+  const target = e.meta?.target;
+  const text = Array.isArray(target) ? target.join(",") : String(target ?? "");
+  return text.includes("bookingCode");
+}
+
 async function verifyTurnstile(token: string | undefined, ip: string | null) {
   const secret = process.env.TURNSTILE_SECRET;
   if (!secret) {
@@ -118,13 +126,34 @@ export async function POST(req: NextRequest) {
     // 代價是兩個「完全同一瞬間」送出的相同信箱請求理論上有極小機率同時通過檢查，這個情境風險很低
     // （是同一個人手滑連點，不是刻意繞過），先接受。已取消的預約不算次數，被後台取消後可以重新登記。
     const enforceEmailLimit = await isQrGateEnabled();
+    const sess = session; // 上面已確認非 null；內部函式裡 TypeScript 看不出來，所以另存一個確定型別的變數
 
-    const booking = await prisma.$transaction(async (tx) => {
+    // 預約編號撞號的處理：編號是「日期 + 4 碼隨機」，一天只有 9000 種，登記人數一多（約 400 筆就預期撞 8 次）
+    // 撞號一定會發生。PostgreSQL 的交易只要有一個指令失敗，整個交易就作廢、後面的指令一律被拒絕，
+    // 所以不能在同一個交易裡「撞號就換一個再 insert」（以前這樣寫，重試其實永遠失敗，使用者會看到 500）。
+    // 正確做法：撞號就讓這一整筆交易回滾（名額也跟著還原），由這個外層迴圈換新編號、整個重做一次，
+    // 使用者完全看不到。連續撞 20 次的機率約 (撞號率)^20，實務上不會發生。
+    const MAX_CODE_ATTEMPTS = 20;
+    let booking: Awaited<ReturnType<typeof createBookingOnce>> | null = null;
+    for (let attempt = 1; attempt <= MAX_CODE_ATTEMPTS; attempt++) {
+      try {
+        booking = await createBookingOnce();
+        break;
+      } catch (e) {
+        if (isBookingCodeCollision(e) && attempt < MAX_CODE_ATTEMPTS) continue;
+        throw e;
+      }
+    }
+    if (!booking) throw new Error("預約編號產生失敗，請再試一次");
+    const created = booking;
+
+    async function createBookingOnce() {
+    return prisma.$transaction(async (tx) => {
       if (enforceEmailLimit) {
         const existing = await tx.booking.count({
           where: {
-            eventId: session.eventId,
-            bookingDate: session.date,
+            eventId: sess.eventId,
+            bookingDate: sess.date,
             emailNormalized,
             status: { not: "cancelled" }
           }
@@ -140,7 +169,7 @@ export async function POST(req: NextRequest) {
       // 原子扣減：單一 UPDATE + WHERE remaining >= headcount，
       // 影響列數為 0 代表名額不足，交由 catch 統一處理（見 PROJECT_SPEC.md 第 3.1 節）。
       const updated = await tx.session.updateMany({
-        where: { id: session.id, remaining: { gte: input.headcount } },
+        where: { id: sess.id, remaining: { gte: input.headcount } },
         data: { remaining: { decrement: input.headcount } }
       });
       if (updated.count === 0) {
@@ -149,40 +178,25 @@ export async function POST(req: NextRequest) {
 
       const consentGivenAt = new Date();
 
-      // 預約編號規則尚未經業主確認，先重試幾次避免極小機率的隨機碼碰撞。
-      let lastError: unknown = null;
-      for (let attempt = 0; attempt < 5; attempt++) {
-        const bookingCode = generateBookingCode(session.date);
-        try {
-          return await tx.booking.create({
-            data: {
-              eventId: session.eventId,
-              sessionId: session.id,
-              bookingCode,
-              name: input.name,
-              phone: input.phone,
-              email: input.email,
-              phoneNormalized,
-              emailNormalized,
-              headcount: input.headcount,
-              consentGivenAt,
-              consentVersion: "v1",
-              status: "confirmed",
-              emailStatus: "pending",
-              bookingDate: session.date
-            }
-          });
-        } catch (e) {
-          // 資料庫層唯一索引只剩 bookingCode 本身（極小機率的隨機碼碰撞），重試即可。
-          // E-mail 當天限一次的規則見上面 enforceEmailLimit，是應用層檢查，不是唯一索引。
-          if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-            lastError = e;
-            continue;
-          }
-          throw e;
+      // 只建立一次；編號撞號時 Prisma 會丟 P2002，直接往外丟，讓外層迴圈整筆交易重做（見上面說明）。
+      return tx.booking.create({
+        data: {
+          eventId: sess.eventId,
+          sessionId: sess.id,
+          bookingCode: generateBookingCode(sess.date),
+          name: input.name,
+          phone: input.phone,
+          email: input.email,
+          phoneNormalized,
+          emailNormalized,
+          headcount: input.headcount,
+          consentGivenAt,
+          consentVersion: "v1",
+          status: "confirmed",
+          emailStatus: "pending",
+          bookingDate: sess.date
         }
-      }
-      throw lastError instanceof Error ? lastError : new Error("預約編號產生失敗，請再試一次");
+      });
     }, {
       // 預設 maxWait 只有 2000ms：短時間大量搶同一場次時，連線池來不及在 2 秒內排到這筆請求，
       // Prisma 會直接丟 「Unable to start a transaction in the given time」，變成使用者看到伺服器錯誤，
@@ -190,18 +204,19 @@ export async function POST(req: NextRequest) {
       maxWait: 10000,
       timeout: 10000
     });
+    }
 
     // 不等待寄信結果（民眾不用等寄信時間）；結果與失敗原因由 sendBookingConfirmation 寫回預約紀錄，
     // 後台預約查詢看得到狀態、寄失敗時可以手動重寄。
-    void sendBookingConfirmation(booking.id);
+    void sendBookingConfirmation(created.id);
 
     return NextResponse.json({
-      bookingCode: booking.bookingCode,
-      name: booking.name,
-      email: booking.email,
-      date: formatDate(booking.bookingDate, "yyyy-MM-dd"),
+      bookingCode: created.bookingCode,
+      name: created.name,
+      email: created.email,
+      date: formatDate(created.bookingDate, "yyyy-MM-dd"),
       timeSlot: session.timeSlot,
-      headcount: booking.headcount
+      headcount: created.headcount
     });
   } catch (e) {
     if (e instanceof BookingError) {
