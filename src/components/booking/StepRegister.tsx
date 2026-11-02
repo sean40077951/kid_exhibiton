@@ -154,7 +154,7 @@ export default function StepRegister({
             </button>
           ))}
         </div>
-        <p className="mt-2 text-xs text-muted">含大人與小孩，需至少 1 位成人同行。</p>
+        <p className="mt-2 text-xs text-muted">含大人與小孩，需至少 1 位成人同行。大小朋友都要計算進去呦！</p>
       </Section>
 
       <Section title="體驗時段">
